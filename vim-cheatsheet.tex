@@ -1,0 +1,250 @@
+\documentclass[11pt]{article}
+\usepackage{array, bm, geometry, hyperref, enumerate, multirow, amsmath, color}
+\geometry{a4paper, top=1cm, bottom=2cm, left=2cm, right=2cm}
+\newcommand{\code}[1]{\texttt{#1}} % type font
+\parindent = 0.5cm
+\usepackage[table]{xcolor}
+\def \myname{Stu Field}
+\title{VIM Cheatsheet}
+\author{\myname}
+\date{}   % no date
+
+
+% Hypersetup
+\hypersetup{
+  pdftitle = {VIM Cheatsheet}, % title
+  colorlinks = true,
+  linkcolor = blue,         % crossrefs
+  citecolor = blue,         % citations
+  pdfauthor = {\myname},    % author
+  pdfkeywords = {VIM},
+  pdfsubject = {vim},
+  pdfpagemode = UseNone
+}
+
+
+
+\begin{document}
+\maketitle
+
+
+\setlength{\tabcolsep}{0.5cm}
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Movement} & \\
+  h      & move left \\
+  j      & move down \\
+  k      & move up \\
+  l      & move right \\
+  w      & jump by start of words (punctuation considered words) \\
+  W      & jump by words (spaces separate words) \\
+  e      & jump to end of words (punctuation considered words) \\
+  E      & jump to end of words (no punctuation) \\
+  b      & jump backward by words (punctuation considered words) \\
+  B      & jump backward by words (no punctuation) \\
+  0      & (zero) start of line \\
+  ctrl+u & page up \\
+  ctrl+d & page down \\
+  \^{}   & first non-blank character of line \\
+  \$     & end of line \\
+  G      & Go To command (prefix with number  $\to\ $ 5G goes to line 5) \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Editing} & \\
+  r    & replace a single character (does not use insert mode) \\
+  J    & join line below to the current one \\
+  cc   & change (replace) an entire line \\
+  cw   & change (replace) to the end of word \\
+  c\$  & change (replace) to the end of line \\
+  s    & delete character at cursor and substitute text \\
+  S    & delete line at cursor and substitute text (same as cc) \\
+  xp   & transpose two letters (delete and paste, technically) \\
+  u    & undo \\
+  .    & repeat last command \\
+  \hline \hline
+\end{tabular}
+
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Insert Mode} & \\
+  i    & start insert mode at cursor \\
+  I    & insert at the beginning of the line \\
+  a    & append after the cursor \\
+  A    & append at the end of the line \\
+  o    & open (append) blank line below current line (no need to press return) \\
+  O    & open blank line above current line \\
+  ea   & append at end of word \\
+  Esc  & exit insert mode \\
+  \hline \hline
+\end{tabular}
+
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Visual Mode} & \\
+  v       & start visual mode, mark lines, then do command (such as y-yank) \\
+  V       & start Line-wise visual mode \\
+  o       & move to other end of marked area \\
+  ctrl+v  & start visual block mode \\
+  O       & move to Other corner of block \\
+  aw      & mark a word \\
+  ab      & a () block (with braces) \\
+  aB      & a \{\} block (with brackets) \\
+  ib      & inner () block \\
+  iB      & inner \{\} block \\
+  Esc     & exit visual mode \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Visual Commands} & \\
+  >      & shift right \\
+  <      & shift left \\
+  y      & yank (copy) marked text \\
+  d      & delete marked text \\
+  $\sim$ & switch case \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Cut \& Paste} & \\
+  yy   & yank (copy) a line \\
+  yl   & yank character under cursor \\
+  2yy  & yank 2 lines \\
+  yw   & yank word \\
+  y\$  & yank to end of line \\
+  p    & put (paste) the clipboard after cursor \\
+  P    & put (paste) before cursor \\
+  dd   & delete (cut) a line \\
+  dw   & delete (cut) the current word \\
+  x    & delete (cut) current character \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Exiting} & \\
+  :w   & write (save) the file, but don't exit \\
+  :wq  & write (save) and quit \\
+  :q   & quit (fails if anything has changed) \\
+  :q!  & quit and throw away changes \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Search \& Replace} & \\
+  /pattern        & search for pattern \\
+  ?pattern        & search backward for pattern \\
+  n               & repeat search in same direction \\
+  N               & repeat search in opposite direction \\
+  :\%s/old/new/g  & replace all \emph{old} with \emph{new} throughout file \\
+  :\%s/old/new/gc & replace all \emph{old} with \emph{new} throughout file with confirmations \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{Multiple Files} & \\
+  :e filename      & Edit a file in a new buffer \\
+  :bnext (or :bn)  & go to next buffer \\
+  :bprev (of :bp)  & go to previous buffer \\
+  :bd              & delete a buffer (close a file) \\
+  :sp filename     & Open a file in a new buffer and split window \\
+  ctrl+ws          & Split windows \\
+  ctrl+ww          & switch between windows \\
+  ctrl+wq          & Quit a window \\
+  ctrl+wv          & Split windows vertically \\
+  \hline \hline
+\end{tabular}
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{VI Spell Check} & \\
+  :set spell            & Turn on spell checking \\
+  \code{]}s             & Go to next misspelled word \\
+  \code{[}s             & Go to previous misspelled word \\
+  \code{]}S             & like \code{]s} but only stop at bad words not rare words \\
+  zg                    & Add word as a good word and append to `\code{spellfile}' \\
+  zG                    & Add word to internal spell list \\
+  zug                   & Remove word from `\code{spellfile}' \\
+  zuG                   & Remove word from internal spell list \\
+  z=                    & List suggestions for misspelled word \\
+  :set spell spelllang=en\_us  & Set region dictionary (us, ca, gb, de\_de, de\_at, de\_ch) \\
+  :set nospell          & Turn off spell checking \\
+  \hline \hline
+\end{tabular}
+
+
+\bigskip\bigskip
+
+\centering
+\rowcolors{1}{lightgray}{white}
+\begin{tabular}{| l | l |}
+  \hline \hline
+  \textbf{PopD/PushD} & \\
+  dirs         & list the directory stack \\
+  dirs -p      & list the directory stack, each on a new line \\
+  dirs -c      & clear the directory stack \\
+  pushd dir    & add directory to the top of the stack and switch to that dir \\
+  pushd -n dir & add directory to the top of the stack and suppress dir switch \\
+  pushd        & switch 1st and 2nd dirs in stack \\
+  pushd -N     & bring Nth (from bottom) stack entry to top, rotates rest, zero indexing \\
+  pushd +N     & bring Nth (from top) stack entry to top, rotates rest, zero indexing \\
+  popd         & pop top dir off the stack and switch to new 1st in stack \\
+  popd +N      & remove the Nth stack entry from the top \\
+  popd -N      & remove the Nth stack entry from the bottom \\
+               & popd +0 == popd \\
+               & popd -0 removes bottom dir in stack \\
+  \hline \hline
+\end{tabular}
+
+
+\def \hzline{\rule[0mm]{\textwidth}{1pt}}
+\vfill \noindent \hzline \\ \centering{\textbf{Last updated:} \today}
+
+\end{document}

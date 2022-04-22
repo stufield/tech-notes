@@ -1,0 +1,68 @@
+---
+title: "Matrix Limits of Detection"
+author: "Stu Field"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library(SomaGlobals)
+knitr::opts_chunk$set(
+ collapse = TRUE,
+ comment = "#>"
+)
+caption <- paste(
+  "Fig. 1: Mixture distribution of clinical samples (red)",
+  "and assay/QC samples (blue).",
+  "Definition of matrix limits of detection (mLoD)."
+)
+```
+
+
+---------
+
+
+## Matrix Limits of Detection (mLoD)
+
+We define a detection limit as the measurement value where population variance
+collapses to assay variance. Matrix limits of detection (mLoD) are calculated
+first by calculating *F*-statistics based on the population level variance 
+($\sigma_{pop}$) compared to the assay variance ($\sigma_{assay}$), calculated
+on replicate measurements of the *same* sample. *F*-statistics are calculated
+by either Ansari-Bradley non-parametric statistics or robust *F*-statistics
+based on the median absolute deviation (MAD), where
+
+$sigma(x) = 1.4826 * mad(x)$.
+
+Estimates of $\sigma_{assay}$ are based on technical replicates of QC samples.
+
+
+```{r mLoD, fig.cap = caption}
+noise_par  <- list(mean = 10, sd = 2)
+signal_par <- list(mean = 20, sd = 7)
+mlod <- 15.5
+noise_vec  <- seq(3, 20, 0.1)
+signal_vec <- seq(5, 35, 0.2)
+plot(noise_vec, dnorm(noise_vec, noise_par$mean, noise_par$sd),
+     ylim = c(0, 0.25), type = "l", main = "Matrix Limit of Detection Estimation",
+     ylab = "Density", xlab = "Measurement Values",
+     xlim = range(c(noise_vec, signal_vec)), col = "blue")
+lines(signal_vec, dnorm(signal_vec, signal_par$mean, signal_par$sd), col = "red")
+abline(v = noise_par$mean, col = "gray70", lty = 5, lwd = 1)
+abline(v = signal_par$mean, col = "gray70", lty = 5, lwd = 1)
+abline(v = mlod, col = "green", lty = 2, lwd = 2)
+legend("topright", legend = c("Assay Noise", "Signal"),
+       col = c("blue", "red"), bg = NULL, lty = 1)
+arrows(noise_par$mean, 0.15, mlod, 0.15, length = 0.1)
+arrows(signal_par$mean - 1, 0.225, mlod, 0.2, length = 0.1)
+text(noise_par$mean, 0.05, expression(mu[assay]))
+text(signal_par$mean, 0.03, expression(mu[signal]))
+text(noise_par$mean + ((mlod - noise_par$mean) / 2), 0.16, expression(2 * sigma[assay]))
+text(signal_par$mean - 1, 0.225, "mLoD", pos = 3)
+```
+
+
+
+------
+
+Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
+(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.

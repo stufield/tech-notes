@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+\usepackage{array, bm, geometry, hyperref, enumerate, multirow, amsmath, color}
+\geometry{a4paper, top=0cm, bottom=2cm, left=2cm, right=2cm}
+\parindent = 0.5cm
+\def \myname{Stu Field}
+\title{The Confusion Matrix}
+\author{\myname}
+\date{}   % no date
+
+% Hypersetup
+\hypersetup{
+  pdftitle = {Confusion Matrix Parameters}, % title
+  colorlinks = true,
+  linkcolor = blue,         % crossrefs
+  citecolor = blue,         % citations
+  pdfauthor = {\myname},    % author
+  pdfkeywords = {Confusion metrics, Statistical analyses},
+  pdfsubject = {conf-mat},  % description
+  pdfpagemode = UseNone
+}
+
+
+\begin{document}
+\maketitle
+
+\setlength{\tabcolsep}{1cm}
+\begin{tabular}{l l | c | c |}
+  \multicolumn{2}{c}{} &  \multicolumn{2}{c}{\textbf{Predicted}} \\[7pt]
+  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{\emph{-ve}} & \multicolumn{1}{c}{\emph{+ve}} \\[7pt]
+  \cline{3-4}
+  &&& \\[7pt]
+  \multirow{6}{*}{\textbf{Actual}}    & \emph{-ve}  & \emph{\Large{tn}}    & \emph{\Large{fp}} \\[7pt]
+  &&& \\[7pt]
+  \cline{3-4}
+  &&& \\[7pt]
+                          & \emph{+ve}  & \emph{\Large{fn}}    & \emph{\Large{tp}}   \\[7pt]
+  &&& \\[7pt]
+  \cline{3-4}
+\end{tabular}
+
+\subsection*{Classification Measures:}
+\
+
+\renewcommand{\arraystretch}{1.5}
+\setlength{\tabcolsep}{0.5cm}
+\begin{tabular}{| l | l |}
+  \hline
+  \textbf{Measure}       & \textbf{Focus}  \\
+  \hline
+  Sensitivity (Recall)   & Identification of Positive Classes \\
+  Specificity            & Identification of Negative Classes \\
+  Precision (PPV)        & Truth Agreement with a Positive Prediction \\
+  Negative Predictive Value (NPV)  & Truth Agreement with a Negative Prediction \\
+  Accuracy               & Total Proportion of Correct Predictions \\
+  \hline
+\end{tabular}
+
+\bigskip
+
+\renewcommand{\arraystretch}{1.5}
+\setlength{\tabcolsep}{0.5cm}
+\begin{tabular}{| l | l | c |}
+  \hline
+  \textbf{Measure}   &  \textbf{Defined by}        &  \textbf{Equation} \\
+  \hline
+  Sensitivity (Recall)  & $Pr(+ \text{prediction}\ | +ve)$    & $\frac{tp}{tp + fn}$ \\
+  Specificity           & $Pr(- \text{prediction}\ | -ve)$    & $\frac{tn}{tn + fp}$ \\
+  Precision (PPV)       & $Pr(+ve\ | + \text{prediction})$    & $\frac{tp}{tp + fp}$ \\
+  NPV                   & $Pr(-ve\ | - \text{prediction})$    & $\frac{tn}{tn + fn}$ \\
+  Accuracy              & $Pr(+ve\ \text{or} -ve\ \text{prediction}\ | +ve\ \text{or}\ -ve$) & $\frac{tp+tn}{tp + tn + fp + fn}$ \\
+  \hline
+\end{tabular}
+
+
+\subsection*{In Hypothesis Testing:}
+
+\renewcommand{\arraystretch}{1.5}
+\setlength{\tabcolsep}{0.5cm}
+\begin{flushleft}
+\begin{tabular}{l l | c | c |}
+  \multicolumn{2}{c}{} &  \multicolumn{2}{c}{\textbf{Prediction}} \\[7pt]
+  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{accept $H_o$} & \multicolumn{1}{c}{reject $H_o$} \\
+  \cline{3-4}
+  \multirow{2}{*}{\textbf{Actual}}  & $H_o=$ true    & TN ($1-\alpha$)      &  Type I ($\alpha$) \\
+\cline{3-4}
+                        & $H_o=$ false    & Type II ($\beta$)    &  TP ($1-\beta$)  \\
+  \cline{3-4}
+\end{tabular}
+\end{flushleft}
+
+\def \hzline{\rule[0mm]{\textwidth}{1pt}}
+\vfill \noindent \hzline \\ \centering{\textbf{Last updated:} \today}
+
+\end{document}

@@ -1,0 +1,97 @@
+\documentclass[12pt]{article}
+\usepackage{array, bm, geometry, hyperref, enumerate, multirow, amsmath, color}
+\geometry{a4paper, top=2.4cm, bottom=2.4cm, left=2.4cm, right=2.4cm}
+\def \myname{Stu Field}
+\title{Variance, Effect Size, Pearson Correlation}
+\author{\myname}
+\date{}   % no date
+
+\def \mysigma{\hat{\sigma}^2}
+
+\hypersetup{
+  pdftitle = {Stat Notes},      % title
+  colorlinks = true,
+  linkcolor = blue,             % crossrefs
+  citecolor = blue,             % citations
+  pdfauthor = {\myname},        % author
+  pdfkeywords = {t-test, variance, effect-size, Pearson Correlation},
+  pdfsubject = {Stats Notes},   % description
+  pdfpagemode = UseNone
+}
+
+\begin{document}
+\maketitle
+
+
+\section{The t-test Variance Calculations}
+
+The general formula for the $t$-statistic is:
+\begin{equation}
+  t = \frac{\hat{\mu_1} - \hat{\mu_2}}{SE_{\mu_1-\mu_2}}
+\end{equation}
+
+\subsection{Equal-n; Equal Variances}
+\begin{equation}
+  t = \frac{\hat{\mu_1} - \hat{\mu_2}}{\sqrt{\frac{1}{2}(\mysigma_1 + \mysigma_2)}\times\sqrt{\frac{2}{n}}}
+\end{equation}
+
+\subsection{Unequal-n; Equal Variances}
+\begin{equation}
+  t = \frac{\hat{\mu_1} - \hat{\mu_2}}{\sqrt{\frac{\mysigma_1(n_1-1) + \mysigma_2(n_2-1)}{n_1+n_2-2}}\times\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}}
+\end{equation}
+
+\subsection{Unequal-n; Unequal Variances}
+\begin{equation}
+  t = \frac{\hat{\mu_1} - \hat{\mu_2}}{\sqrt{\frac{\mysigma_1}{n_1} + \frac{\mysigma_2}{n_2}}}
+\end{equation}
+
+
+
+\section{Effect Size}
+
+\begin{equation}
+  \delta = \frac{\hat{\mu_1} - \hat{\mu_2}}{\sqrt{\mysigma_{pooled}}}
+\end{equation}
+
+where $\mysigma$ is the pooled variance of the two means, or for $k$ groups:
+
+\begin{equation}
+  \mysigma_{pooled} = \frac{\sum_{i=1}^k(n_i - 1)\mysigma_i}{\sum_{i=1}^k(n_i-1)}, \quad\quad\quad\; i=1,\dots,k.
+\end{equation}
+
+
+
+
+\section{Pearson Correlation}
+
+The correlation between 2 random variables is described by the
+parametric Pearson's product-moment correlation coefficient ($\rho$):
+
+\begin{equation}
+  \rho_{xy} = \frac{cov(x,y)}{\sigma_x \cdot \sigma_y}
+\end{equation}
+
+where,
+
+\begin{eqnarray}
+  cov(x,y) &=& \frac{ \sum_{i=1}^n(x_i - \bar{x})(y_i - \bar{y}) }{ (n - 1) } \\
+  && \nonumber \\
+  \sigma_x^2 &=& \frac{ \sum_{i=1}^n(x_i - \bar{x})^2}{ (n - 1) } \\
+  && \nonumber \\
+  cov(x,x) &=& var(x) = \sigma_x^2
+\end{eqnarray}
+
+
+\subsection{Significance of $\rho_{xy}$}
+
+Statistical significance of the estimate of $\rho$ can be evaluated via
+the calculation of a $t$-statistic via the following:
+
+\begin{equation}
+  t = \rho \sqrt{\frac{n - 2}{1 - \rho^2}}
+\end{equation}
+
+The same $t$-statistic can also be used for the non-parametric
+Spearman correlation coefficient.
+
+\end{document}

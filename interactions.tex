@@ -1,0 +1,53 @@
+\documentclass[12pt]{article}
+\usepackage{array, bm, geometry, hyperref, enumerate, multirow, amsmath, color}
+\newcommand{\code}[1]{\texttt{#1}}                      % type font
+\usepackage[table]{xcolor}
+\geometry{a4paper, top=2.4cm, bottom=2.4cm, left=2.4cm, right=2.4cm}
+\parindent = 0.5cm
+\def \myname{Stu Field}
+\title{Interactions}
+\author{\myname}
+\date{}   % no date
+\renewcommand\footnotemark{}
+
+
+
+\begin{document}
+\maketitle
+
+
+\section{Interaction}
+Given for groups 1 and 2:
+
+\begin{eqnarray*}
+	\hat{y}_1 &=& \hat{\beta}_{01} + \hat{\beta}_{11} x \\
+	\hat{y}_2 &=& \hat{\beta}_{02} + \hat{\beta}_{12} x \\
+\end{eqnarray*}
+
+Set up a dummy variable \code{G}, where:
+
+\begin{equation*}
+\rowcolors{1}{}{}
+	G = \begin{cases}
+		0, & group\ 1 \\
+		1, & group\ 2
+		\end{cases}
+\end{equation*}
+
+therefore,
+
+\begin{eqnarray*}
+	y_j &=& G\big[ \beta_{02} + \beta_{12} - (\beta_{01} + \beta_{11}x_j)\big] + (\beta_{01} + \beta_{11}x_j) + \epsilon \\
+			&& \\
+	&=& \beta_{01} + \beta_{11} x + G\beta_{02} + G\beta_{12} - G\beta_{01} - G\beta_{11}x_j + \epsilon \\
+			&& \\
+	&=& \beta_{01} + \beta_{11} x + G(\beta_{02} - \beta_{01}) + Gx_j(\beta_{12} - \beta_{11}) + \epsilon \\
+			&& \\
+	&=& \alpha_0 + \alpha_1x + G\alpha_2 + Gx_j\alpha_3 + \epsilon
+\end{eqnarray*}
+
+
+\def \hzline{\rule[0mm]{\textwidth}{1pt}}
+\vfill \noindent \hzline \\ \centering{\textbf{Last updated:} \today}
+
+\end{document}

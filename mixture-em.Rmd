@@ -1,0 +1,131 @@
+---
+title: "Mixture Model Expectation-Maximization"
+author: "Stu Field"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library(SomaGlobals)
+source("lib/mixture-em.R")
+knitr::opts_chunk$set(
+ collapse = TRUE,
+ comment  = "#>"
+)
+cap1 <- paste(
+  "Fig. 1: The log-likelihood trajectory and posterior responsibilities",
+  "for the final estimates. Responsibilities are for",
+  "$dist_2$ (left) but can be either (random assignment).")
+cap2 <- paste(
+  "Fig. 2: The distribution, overall density, and individual",
+  "densities for the final estimates.")
+```
+
+
+---------
+
+
+# Mixture E-M
+
+Expectation maximization (E-M) is an iterative procedure (algorithm) for
+finding the maximum likelihood solution (estimates) for difficult maximum
+likelihood problems (e.g. models with latent variables). This is achieved
+in a similar way to *k*-means clustering, however instead of minimizing
+the within-cluster variance at each iteration, we maximize the likelihood
+of the data by calculating weighted-maximum likelihood estimates of the
+parameters at each iteration. We are trying to fit the model:
+
+$$
+\begin{aligned}
+g(Y) &= (1-\pi) \phi_{\theta_1}(y) + \pi\phi_{\theta_2}(y), \\
+where, && \\
+\hat{\pi} &= {\cal P}(x=2),\; x \in \{1,2\}, \\
+\phi_{\theta_x}(y) &= \text{the normal density with parameters } \theta_x,\; x \in \{1,2\}.
+\end{aligned}
+$$
+
+-------
+
+### The steps are as follows:
+
+1. Make **initial guesses** for:
+$\hat{\mu}_1,\ \hat{\mu}_2,\ \hat{\sigma}^2_1,\ \hat{\sigma}^2_2, \text{ and } \hat{\pi}$:
+$$
+\begin{aligned}
+  bins &= \text{ randomly assign data points to 1 of 2 bins} \\
+  \hat{\sigma}^2_1,\hat{\sigma}^2_2 &= 1/rexp(2, rate = sd(bins)) \\
+  \hat{\mu}_1,\hat{\mu}_2 &= rnorm(2, mean = mean(bins), sd = c(\hat{\sigma}^2_1,\hat{\sigma}^2_2)) \\
+  \hat{\pi} &= 0.5
+\end{aligned}
+$$
+
+1. **Expectation**: compute *responsibilities* from posterior probabilities,
+where the responsibilities are the relative contribution of distribution 2
+(the second mode) in *explaining* each data point (this is a *soft* assignment).
+Responsibilities of mode 2 for observation $i$ given the current estimates are:
+$$
+\hat{\gamma_i} = \frac{\hat{\pi}\phi_{\theta_2}(y_i)}{(1-\hat{\pi})\phi_{\theta_1}(y_i) + \hat{\pi}\phi_{\theta_2}(y_i)},\quad\quad i = 1,\dots,n.
+$$
+
+1. **Maximization**: compute *weighted* maximum likelihood to update the estimates:
+$$
+\begin{aligned}
+\hat{\mu}_1 &= \frac{\sum_{i=1}^n(1-\hat{\gamma}_i)y_i}{\sum_{i=1}^n(1-\hat{\gamma}_i)},
+\quad \quad \quad \quad \quad
+\hat{\mu}_2 = \frac{\sum_{i=1}^n\hat{\gamma}_iy_i}{\sum_{i=1}^n\hat{\gamma}_i}, \\
+\hat{\sigma}^2_1 &= \frac{\sum_{i=1}^n(1-\hat{\gamma}_i)(y_i-\hat{\mu}_1)^2}{\sum_{i=1}^n(1-\hat{\gamma}_i)},
+\quad \quad 
+\hat{\sigma}^2_2 = \frac{\sum_{i=1}^n\hat{\gamma}_i(y_i-\hat{\mu}_2)^2}{\sum_{i=1}^n\hat{\gamma}_i}, \\
+\hat{\pi} &= \sum_{i=1}^n\frac{\hat{\gamma}_i}{n}.
+\end{aligned}
+$$
+
+1. Compute log-likelihood:
+$$
+{\cal L} = \sum_{i=1}^n log\big[\; (1-\hat{\pi})\phi_{\theta_1}(y_i) + \hat{\pi}\phi_{\theta_2}(y_i)\; \big]
+$$
+
+1. Check **convergence**: check if criterion of the log-likelihood has been met,
+if not, repeat above steps with new values of
+$\hat{\mu}_1,\ \hat{\mu}_2,\ \hat{\sigma}^2_1,\ \hat{\sigma}^2_2, \text{ and } \hat{\pi}$
+as initial guesses.
+	
+	
+------
+
+
+## Running the Algorithm
+
+```{r em}
+# create a mixture distribution with 2 modes; n = 75 for each
+data <- withr::with_seed(
+  1001, c(rnorm(50, mean = 2, sd = 1), rnorm(50, mean = 7, sd = 1))
+)
+
+# default initial parameters
+mix_fit <- withr::with_seed(1, normal_k2_mixture(data))
+```
+
+
+## Visualizing the Algorithm
+
+```{r plot-em1, fig.cap = cap1, fig.width = 9, fig.height = 5}
+par(mfrow = c(1, 2))
+plot(mix_fit, "likelihood")
+plot(mix_fit, "posterior")
+```
+
+```{r plot-em2, fig.cap = cap2, fig.width = 9, fig.height = 5}
+plot(mix_fit)
+```
+
+
+Estimates:
+
+```{r estimates}
+mix_fit
+```
+------
+
+Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
+(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.

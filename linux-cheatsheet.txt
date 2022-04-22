@@ -1,0 +1,346 @@
+# ----------------------------------- #
+# Stu's cheat sheet of UNIX commands
+# ----------------------------------- #
+#         symbolic links
+# ----------------------------------- #
+ln -sf [target] [location]         # soft link
+ln -Lf [target] [location]         # hard link
+
+# ------------------ #
+# VIM
+# ------------------ #
+# rebuild vim spellfile
+:mkspell! ~/.vim/spell/en.utf-8.add
+
+# multiple buffer search/replace
+:bufdo %s/<pattern>/<replace>/ge | update
+
+# -------------------------------- #
+# Check System Status CRON
+# -------------------------------- #
+systemctl status cron
+
+# ------------------------ #
+# Finding
+# ------------------------ #
+find [path] -name [*pattern*]       # find filenames matching the quote string from current root
+grep -r [pattern] [file]            # find a search string inside files and list them
+     -i   find a search string inside files and list them (case insensitive)
+     -l    find a search string inside files and list only the files that contain them
+grep [pattern] $(find [path] -type f -name [file pattern])   # grep for string only in certain files from find
+grep [pattern] **/*.R               # via Z-shell
+# open in VIM as buffers
+vi $(grep -lr [pattern] *)
+vi $(grep -lr [pattern] `find -name *.R`)
+vi $(grep -l [pattern] **/*.R)   # using Z-shell
+
+
+# ----------------------------------- #
+# mounting drives
+# ----------------------------------- #
+sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/shared /media/S
+sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/res_dev /media/R
+sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/home/sfield /media/H
+
+
+# ----------------------------------- #
+# BASH tricks
+# ----------------------------------- #
+cd -  OR cd $OLDPWD               # go back to previous directory
+touch blahfile{1,2,3}.txt         # create multiple files
+mv blahfile{1,one}.txt            # rename file with old/new name
+mkdir -p test/{shintaro,stu}      # make subdirectories
+mkdir -p test2/f1/f2              # make parents as necessary (linear tree)
+!!                                # repeat last command
+!                                 # repeat last search command
+rm !(*.c|*.py)                    # remove all files except those with .c or .py extension
+rm ./-file                        # remove file beginning with hyphen
+echo $?                           # return value of last command
+!^                                # first argument
+!$                                # last argument
+!:[number]                        # number argument.
+# moves filename1 to destination
+# example
+touch filename1 filename2
+mkdir destination
+mv !touch^ !$
+
+
+# ----------------------------------- #
+# Trailing/Leading Spaces
+# ----------------------------------- #
+gsub("[[:space:]]*$", "", x)
+gsub("^[[:space:]]*", "", x)
+
+
+# -------------------------------------------- #
+# Trailing Tabs
+# -------------------------------------------- #
+:%s/\s\+$//
+
+
+# -------------------------------------------- #
+# Use grouping grep
+# -------------------------------------------- #
+gsub("^(.+)(SL[0-9]+_[0-9][a-z]).+$", "\\2", "data/CalibratorReference.SL14386_9f.txt")
+
+
+# -------------------------------- #
+# chmod + chown
+# -------------------------------- #
+u = user
+g = group
+o = others
+a = all
+r = read permission
+w = write permission
+x = execute permission
+# -------------------------------- #
+chmod 775 *.R                     change permissions for all files with the .R extension
+chmod u+x filename                give user permission to execute
+chmod u+x,g+x filename            give user & group permission to execute
+chmod a+x filename                give everybody execute permissions
+chmod u-rx filename               remove read and excute permissions for user
+chmod --reference=file1 file2     match permissions of file2 to file1
+chmod -R dirname/                 apply permissions to all files under directory recursively
+chown sfield:sfield file          change ownership permissions
+# -------------------------------- #
+7 = rwx
+6 = rw-
+5 = r-x
+4 = r--
+3 = -wx
+2 = -w-
+1 = --x
+0 = ---
+
+
+# -------------------------------- #
+# Lists
+# -------------------------------- #
+du -sch *          size of directory
+ls -l | wc          size and number of visible files in current directory
+ls -a | wc          size and number of ALL files in current directory
+ls -l | wc -l       how many visible files in current directory
+ls -a | wc -l       how many TOTAL files in current directry
+ls -alS             list all files by size
+ls -dl filename     get permissions for a file
+
+
+# ----------------------------------- #
+# Trash
+# ----------------------------------- #
+~/.local/share/Trash/files
+
+
+# -------------------------------- #
+# Zip
+# -------------------------------- #
+zip filename.zip file1 file2 file3 ...
+zip -e filename.zip file1 file2 file3 ...  (with password)
+unzip filename.zip                         unzip file
+unzip filename.zip -d dirname              unzip file to a directory
+unzip -l filename.zip                      list contents of zip file
+unzip -l filename.zip | vi -               list contents of zip file to vi
+
+
+# -------------------------------- #
+# Tar
+# -------------------------------- #
+tar -cvzf filename.tar.gz file1 file2 file3 ...   tar first, then zip
+tar -cvf filename.tar file1 file2 file3  ...      just tarball
+tar -xvf filename.tar                             untar to current directory
+tar -xvf filename.tar -C dirname/                 untar to specified directory
+gunzip filename.tar.gz                            unzip the tarball, create tarball
+tar -tvf filename.tar                             list contents of tarball
+tar -ztvf filename.tar.gz                         list contents of zipped tarball
+
+
+# -------------------------------- #
+# replacing text in files
+# based on search pattern
+# -------------------------------- #
+for i in *Rd; do sed -e "s/string/replace/" $i > fixed/$i; done
+
+
+# -------------------------------- #
+# look for running processes
+# -------------------------------- #
+ps -ef | grep "string"
+
+
+# -------------------------------- #
+# German Esset and Umlaut characters
+# -------------------------------- #
+Crtl + Shift + u + 00df + <Enter>
+RightAlt + ss       -> ß     (in sequence; must set RightAlt to Alternative Characters Key in Settings)
+RightAlt + u + "    -> ü
+RightAlt + a + "    -> ä
+
+
+# -------------------------------- #
+# pushd
+# -------------------------------- #
+dirs                 list the directory stack
+dirs -p              list the directory stack, each on a new line
+dirs -c              clear the directory stack
+pushd dir            add directory to the stack and change to that dir
+pushd -n dir         add directory to the stack and suppress dir change
+pushd *no args*      switch 1st and 2nd dirs in stack
+pushd -N             Rearrange the stack, bringing the Nth stack entry to front, rotating the rest of the stack
+pushd +N             Same above, but the Nth entry from the left (above is Nth entry from right).
+popd                 pop 1st dir off the stack and switch to 2nd
+popd +N              remove the Nth stack entry from the top
+popd -N              remove the Nth stack entry from the bottom
+
+
+# -------------------------------- #
+# Kill a Process
+# -------------------------------- #
+top
+ps -ef | grep exec
+kill -USR1 <#>
+
+
+# -------------------------------- #
+# Manage PDFs
+# -------------------------------- #
+pdftk *.pdf cat output combined.pdf                        combine multiple PDFs
+pdftk combined.pdf burst output mypage_%02d.pdf            separate multi-page PDF into single PDFs
+
+
+# -------------------------------- #
+# aterm settings
+# -------------------------------- #
+urxvt -scrollColor blue -tint blue -g 98x32 -title Blue
+
+
+# -------------------------------- #
+# cron settings
+# -------------------------------- #
+
+   * * * * *      command to execute
+   | | | | |
+   | | | | |
+   | | | | +----   day of week (0 - 6) | Sunday=0
+   | | | +------   month of year (1 - 12)
+   | | +--------   day of month (1 - 31)
+   | +----------   hour of day (0 - 23)
+   +------------   min of hour (0 - 59)
+
+
+# -------------------------------- #
+# get drive/mount disk space
+# -------------------------------- #
+df -Th
+
+
+# -------------------------------- #
+# SomaLogic Colors
+# -------------------------------- #
+Purple:   R=90      G=85      B=110      [rgb(90,85,110,max=255)]
+Grey:     R=180     G=171     B=168
+
+
+# -------------------------------- #
+# Local compile of application (R)
+# and installation compile from source
+# -------------------------------- #
+mv ~/Downloads/R-3.1.0.tar.gz ~/Apps         # move tarball to dest dir
+tar -zvxf R-3.1.0.tar.gz                     # unzip
+cd R-3.1.0                                   # go into unzipped dir
+#./configure --prefix=/usr                   # run configure for /usr
+./configure                                  # run configure
+make                                         # run make to finish local install
+make check                                   # checks that system-wide install will work
+#sudo make install                           # installs R to root in /usr/local/
+#sudo make uninstall                         # uninstall R
+
+
+
+# update R in Windows
+require(installr)
+updateR()
+
+# -------------------------------- #
+# run R examples check only
+# -------------------------------- #
+R -q --vanilla < SomaPkg-Ex.R                     # this is run on the Ex file generated by R CMD check
+
+
+# -------------------------------- #
+# VirtualBox
+# -------------------------------- #
+deb http://download.virtualbox.org/virtualbox/debian wily contrib      # virtualbox in sources.list
+https://www.virtualbox.org/wiki/Linux_Downloads
+sudo apt-get install virtualbox virtualbox-dkms
+sudo apt-get install virtualbox-guest-additions-iso
+# Oracle_VM_VirtualBox_Extension_Pack-5.0.14-105127.vbox-extpack
+Install extension pack by: File -> Preferences -> Extensions
+                           Remove old extensions and add new
+
+
+# -------------------------------- #
+# batch rename
+# -------------------------------- #
+rename 's/pattern/replace/g' Soma*.log      # regular files
+for i in Soma*.tar.gz; do svn mv $i `echo $i | sed 's/4/5/'`; done      # files under SVN control
+
+
+# -------------------------------- #
+# upgrade git
+# -------------------------------- #
+sudo add-apt-repository ppa:git-core/ppa -y
+sudo apt-get update
+sudo apt-get install git
+git --version
+
+
+# -------------------------------- #
+# Git get code from deleted file
+# -------------------------------- #
+git log --all -- <path-to-file>
+git show <SHA> -- <path-to-file>
+
+
+# -------------------------------- #
+# Update Phone File
+# -------------------------------- #
+1) Get new *.docx file from Lauren
+2) Save As *.txt file:
+   i) MS-DOS encoding
+   ii) check insert line breaks
+   iii) use CR/LF
+3) call format.phone.file input.txt output.txt
+
+# -------------------------------- #
+# Java
+# -------------------------------- #
+sudo apt-get install oracle-java8-installer
+sudo apt-get install oracle-java8-set-default
+java -version
+
+
+# -------------------------------- #
+# Ubuntu release
+# -------------------------------- #
+lsb_release -a
+
+
+# -------------------------------- #
+# apt-get
+# -------------------------------- #
+sudo apt-get install linux-headers-generic build-essential
+sudo vi /etc/apt/sources.list
+sudo apt-get update
+apt-cache showpkg r-base
+sudo apt-get install <pkgs>
+
+
+# ----------------------------------- #
+# Increase VBox HD Storage
+# ----------------------------------- #
+VBoxManage modifyhd --compact   # this should release memory from the VM is dynamically taken
+VBoxManage modifyhd --resize 80000 VMwin7.vdi   # 80GB
+File -> Virtual Media Manager -> Release then Remove
+Settings -> Storage -> Controller:SATA -> Add Icon -> "point to *.vdi" -> OK
