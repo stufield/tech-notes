@@ -30,7 +30,6 @@
 \end{eqnarray*}
 
 
-
 \section{Bayes In Practice}
 
 \begin{eqnarray*}
@@ -48,7 +47,6 @@
 			log\Bigg(\frac{P(A_n=a_n|x=c_1)}{P(A_n=a_n|x=c_2)}\Bigg)
 \end{eqnarray*}
 
-
 \newpage
 
 Therefore, putting together gives,
@@ -60,7 +58,6 @@ Therefore, putting together gives,
 			log\bigg(\frac{P(x=c_1)}{P(x=c_2)}\bigg)
 \end{eqnarray*}
 
-
 where,
 
 \begin{equation*}
@@ -69,15 +66,17 @@ where,
 
 is the Bayesian prior and is typically set to zero (unless known previously).
 
-
 \subsection{Calculation of the Terms}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{plots/bayes_distn.pdf}
-  \caption{PDFs of the a theoretical control population (blue) and disease population (red) for a single analyte. The population estimates are shown and the green line represents a sample value of 14. The odds ratio is the probability of control given the sample value over the probability of disease given the sample (\code{dnorm(14, 10, 1.5) / dnorm(14, 17, 2)}).}
+	\includegraphics[width=0.8\textwidth]{plots/bayes-distn.pdf}
+  \caption{PDFs of the a theoretical control population (blue) and disease
+  population (red) for a single analyte. The population estimates are shown
+  and the green line represents a sample value of 14. The odds ratio is the
+  probability of control given the sample value over the probability of
+  disease given the sample (\code{dnorm(14, 10, 1.5) / dnorm(14, 17, 2)}).}
 \end{figure}
-
 
 \def \hzline{\rule[0mm]{\textwidth}{1pt}}
 \vfill \noindent \hzline \\ \centering{\textbf{Last updated:} \today}

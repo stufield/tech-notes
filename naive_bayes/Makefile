@@ -24,6 +24,12 @@ PDFLATEX = pdflatex --interaction=batchmode
 	@$(PDFLATEX) $*
 	@$(PDFLATEX) $*
 
+bayes-classifier.tex: plots/bayes-distn.pdf
+	@$(TOUCH) $@
+
+plots/bayes-distn.pdf: plots/bayes-distn-plot.R
+	@$(RSCRIPT) plots/bayes-distn-plot.R
+
 %.html: %.Rmd bayes-data.rds
 	$(RSCRIPT) -e "rmarkdown::render('$*.Rmd', quiet = TRUE)"
 
