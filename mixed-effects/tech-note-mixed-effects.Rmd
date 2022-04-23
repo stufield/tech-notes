@@ -1,0 +1,493 @@
+---
+title: "Technical Note: <br> Primer on Longitudinal Data Analysis <br> via Linear Mixed-Effects Models"
+author: "Stu Field"
+date: "`r format(Sys.Date(), '%e %B %Y')`"
+output:
+  html_document:
+    code_folding: show
+    number_sections: yes
+    toc: yes
+    toc_float:
+      collapsed: no
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+library(ggplot2)
+library(SomaMixedEffects)
+y_lab <- bquote("Response ("*y[ij]*")")
+```
+
+------------
+
+# The Linear Model
+
+For a simple linear-*fixed* effect model, the model equation fits the
+equation:
+
+$$
+\begin{eqnarray} 
+  y_i      & \sim & \beta_0 + \beta_1 x_i + \epsilon_i \\
+  && \\
+  \epsilon & \sim & N(0, \sigma^2_n), \nonumber
+\end{eqnarray}
+$$
+
+for the $i^{th}$ sample/observation. Thus, we can estimate the model
+coefficients via,
+
+$$
+\begin{equation} 
+   \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i 
+\end{equation}
+$$ where, $$
+\begin{eqnarray*}
+   \hat{\beta}_1 &=& \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i-\bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} \\
+   \hat{\beta}_0 &=& \bar{y} - \hat{\beta}_1 \bar{x} \\
+   \epsilon_i &=& r_i  \\
+    &=& y_i - \hat{y}_i \\
+    RSS &=& \sum_{i=1}^n \epsilon_i^2 = \sum_{i=1}^n (y_i - \hat{y}_i)^2 \\
+    &=& (y_1 - \hat{\beta_0} - \hat{\beta_1}x_1)^2 +
+       (y_2 - \hat{\beta_0} - \hat{\beta_1}x_2)^2 + \dots +
+       (y_n - \hat{\beta_0} - \hat{\beta_1}x_n)^2 \\
+   \text{and} \\
+    R^2 &=& (TSS - RSS) / TSS \\
+    TSS &=& \sum (y_i - \bar{y})^2
+\end{eqnarray*}
+$$
+
+The Total Sum of Squares (TSS) measures the total variance in the
+response (*Y*), thus $R^2$ is the proportion of the total variance in
+*Y* that can be explained by the model. The remaining variance is packed
+into $\epsilon$. To calculate the accuracy of the coefficient estimates,
+we need a measure of variance in *Y*:
+
+$$
+\begin{eqnarray*}
+   \text{SE}(\hat\beta_0)^2 &=& \sigma^2 \bigg[ \frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^n(x_i-\bar{x})^2} \bigg] \\
+       && \\
+   \text{SE}(\hat\beta_1)^2 &=& \frac{\sigma^2}{\sum_{i=1}^n(x_i-\bar{x})^2} \\
+   \text{where,} && \\
+   \sigma^2 &=& Var(\epsilon), \\
+\end{eqnarray*}
+$$
+
+and $\sigma^2$ can be estimated from the data via the Residual Standard
+Error (RSE):
+
+$$
+\begin{equation*}
+    RSE = \sqrt{RSS/(n-2)}
+\end{equation*}
+$$
+
+# Multiple-Linear Regression
+
+The linear model can easily be expanded to include multiple predictors
+(regressors/variables/proteins). The extension of Eqn\~**1** can be modeled as:
+
+$$
+\begin{eqnarray}
+   y_i &=& \beta_0 x_{0i} + \beta_1 x_{1i} + \dots + \beta_p x_{pi} + \epsilon_i \\
+   && \\
+   \epsilon_i &\sim& \text{NID}(0,\sigma^2)
+\end{eqnarray}
+$$
+
+for the $i^{th}$ sample and $p^{th}$ covariate. We typically set
+$x_{0i}=1$ so that $\beta_0$ is a constant intercept. In this form, the
+only *random-effect* is the error term, $\epsilon_i$. This equation can
+be rewritten in matrix form as:
+
+$$
+\begin{eqnarray}
+   \begin{pmatrix}
+       y_1 \\ y_2 \\ \vdots \\ y_n
+    \end{pmatrix}
+       &=&
+    \begin{pmatrix}
+        x_{11} & x_{12} & \dots & x_{1p} \\
+        x_{21} & x_{22} & \dots & x_{2p} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        x_{n1} & x_{n2} & \dots & x_{np} \\
+    \end{pmatrix}
+    *
+    \begin{pmatrix}
+        \beta_1 \\ \beta_2 \\ \vdots \\ \beta_p
+    \end{pmatrix}
+    +
+    \begin{pmatrix}
+        \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n
+    \end{pmatrix}
+    \\ \nonumber && \\ \nonumber
+    \vec y &=& \mathbf{X} \vec \beta + \vec \epsilon
+\end{eqnarray}
+$$
+
+where $\vec y$ is a $n \times 1$ vector, $\mathbf{X}$ is the
+$n \times p$ data matrix, $\vec \beta$ is a $p\times1$ vector of fixed
+effects coefficients for the $p$ covariates, and $\vec \epsilon$ is the
+$n \times 1$ vector of observation specific errors.
+
+# The Mixed-Effect Model
+
+Mixed-effects models fit both fixed effects *and* random effects in the
+same model. We assume a grouping or dependence structure (typically
+temporal or spatial) that is sampled from a larger population (e.g.
+plots within a farm, schools within districts, or observations within
+subjects). We also assume *compound symmetry*, which is a fancy way of
+saying that the related samples vary in the same fashion for each
+`group` (subject), i.e. the off-diagonal of the variance-covariance
+matrix are all equal. For longitudinal data, samples from the same
+individual reflect serial dependence and the model must account for this
+non-independence in sample structure. Typically we are interested in
+fitting subject-specific (random) intercepts (i.e. parallel linear fits
+can hit the y-axis independently) and define the following:
+
+$$
+\begin{eqnarray*}
+  y_{ij} &=& b_{0i} + \beta_1 x_{ij} + \epsilon_{ij} \\
+  && \\
+    b_i &\sim& N(0,\sigma^2_b) \\
+  && \\
+    \epsilon &\sim& N(0,\sigma^2_n)
+\end{eqnarray*}
+$$
+
+for the $j^{th}$ observation of the $i^{th}$ subject, where $b$ is a
+parameter treated as a random variable (i.e. $i$ subjects sampled from a
+large, infinite population of potential subjects). These random effects
+are thus assumed to vary by group (in this case subjects) \dots the goal
+is to capture this variation in the coefficients and prevent it from
+being packaged into $\epsilon$!
+
+# Syntax in `R`
+
+Use the `nlme` or `lme4` package. `R` uses the Wilkinson notation in
+specifying model formulas.
+
+### Random Intercept {.unnumbered}
+
+```{r, eval = FALSE}
+lme(y ~ time * group, random = ~ 1 | pid, data = adat)
+```
+
+### Random Slope {.unnumbered}
+
+```{r, eval = FALSE}
+lme(y ~ time * group, random = ~ time | pid, data = adat)
+```
+
+### Random Intercept & Random Slope {.unnumbered}
+
+```{r, eval = FALSE}
+lme(y ~ time * group, random = ~ 1 + time | pid, data = adat)
+```
+
+### Syntax Definitions {.unnumbered}
+
+| Symbol         |               | Corresponds to                                   |
+|----------------|---------------|:------------------------------------------------:|
+| $y$            | $\rightarrow$ | $y_{ij}$                                         |
+| $∼ 1$          | $\rightarrow$ | random effects ($b_{0i}$)                        |
+| `pid`          | $\rightarrow$ | field containing the dependent groups (subjects) |
+| `time * group` | $\rightarrow$ | fixed effects (with interaction term)            |
+| `time * group` | $\rightarrow$ | `time + group + time * group`                    |
+
+
+-----------
+
+# Example 1: Response to Drug
+
+First, simulate longitudinal data for 20 subjects, having $3-10$ serial
+samples each, intercept ($\beta_0 = 1000$), slope ($\beta_1 = 400$), and
+a serial autocorrelation parameter of 0.1. The default simulation values
+can be seen below:
+
+```{r args}
+args(simulateLongData)
+```
+
+```{r simulate_data1}
+# simulate longitudinal data
+# createLongData() is a wrapper for simulateLongData()
+p <- list(nsubj = 20, beta0 = 1000, beta1 = 400, max.obs = 10, r.seed = 101,
+          sd.pars = list(sigma = 250), auto.cor = 0.1)
+ResponseData <- createLongData(subject = p)
+ResponseData
+table(ResponseData$pid)
+```
+
+```{r plot_long_pid, fig.width = 10, fig.height = 9}
+# plot longitudinal traces by subject ("pid")
+ResponseData |>
+  ggplot(aes(x = time, y = yij, group = pid, colour = pid)) +
+  geom_line() +
+  geom_point( size = 4, shape = 21, fill = "white") +
+  ylab(y_lab) +
+  guides(colour = guide_legend(ncol = 1)) +
+  facet_wrap(vars(pid)) +
+  ggtitle(bquote(y[ij]~"~"~time))
+```
+
+```{r plot_long_combined, fig.width = 8, fig.height = 7}
+# plot longitudinal traces together
+ResponseData |>
+  ggplot(aes(x = time, y = yij, group = pid, colour = pid)) +
+  geom_line() +
+  geom_point(size = 4, shape = 21, fill = "white") +
+  ylab(y_lab) +
+  guides(colour = guide_legend(ncol = 1)) +
+  facet_wrap(vars(Group)) +
+  ggtitle(bquote(y[ij]~"~"~time))
+```
+
+## Analysis in `R`
+
+The model we wish to fit: $$
+\begin{equation}
+   y_{ij} = b_{0i} + \beta_1 time_{ij} + \epsilon_{ij},
+\end{equation}
+$$
+
+again for the $j^{th}$ observation of the $i^{th}$ subject, where
+$b_{0i}$ is the subject-specific random *intercept*, and $\beta_1$ is
+the fixed-effect for *time*.
+
+```{r fit1}
+fit1 <- fit_lme_safely(yij ~ time, random = ~ 1 | pid, data = ResponseData)
+summary(fit1)
+```
+
+From the fixed-effects column in `Value`, the estimates are reasonably
+close to the original parameters:
+
+- $\hat{\beta_0}=$
+  `r round(summary(fit1)[["tTable"]]["(Intercept)", "Value"], 2)`
+- $\hat{\beta_1}=$
+  `r round(summary(fit1)[["tTable"]]["time", "Value"], 2)`
+
+Both the slope and intercepts differ significantly from zero.
+
+
+-------------
+
+# Example 2: Group Dependent Response (Interaction)
+
+In clinical studies, it is often of interest to understand how the
+treatment of one group of subjects differs from another group of
+subjects (e.g. a control group). In a mixed-model setting, this is
+accomplished by adding an interaction term to the model, which sets up a
+conditional response variable, given that a subject belongs to a
+particular group/class.
+
+Next, simulate longitudinal data for 20 subjects, having $3-10$ serial
+samples each, intercepts of $\beta_0=1000$, slopes of $\beta_1=0$ (crtl)
+and $\beta_1=500$ (treat), and a serial autocorrelation parameter of
+0.1. The parameters that differ from the default simulation values can
+be seen below:
+
+```{r simulate_data2, warning = FALSE}
+# simulate longitudinal data with group-specific response
+control <- list(nsubj = 20, beta1 = 0, max.obs = 10, r.seed = 10,
+                sd.pars = list(sigma = 150), auto.cor = 0.1)
+treatment <- list(nsubj = 20, beta1 = 500, max.obs = 10, r.seed = 11,
+                  sd.pars = list(sigma = 350), auto.cor = 0.1)
+GroupResponseData <- createLongData(control, treatment)
+```
+
+Now plot the longitudinal time traces:
+
+```{r plot_long_combined2, fig.width = 12, fig.height = 6}
+GroupResponseData |>
+  ggplot(aes(x = time, y = yij, group = pid, colour = pid)) +
+  geom_line() +
+  geom_point(size = 4, shape = 21, fill = "white") +
+  ylab(y_lab) +
+  guides(colour = guide_legend(ncol = 2)) +
+  facet_wrap(vars(Group)) +
+  ggtitle(bquote(y[ij]~"~"~time))
+```
+
+## Analysis in `R`
+
+The model specification to fit:
+$$
+\begin{equation}
+   y_{ij} = b_{0i} + \beta_1 time_{ij} + \beta_2 group_i + 
+     \beta_3 (group_i \times time_{ij}) + \epsilon_{ij},
+\end{equation}
+$$
+
+again for the $j^{th}$ observation of the $i^{th}$ subject, $b_{0i}$ is
+still the subject-specific random intercept and $\beta_1$ is still the
+fixed-effect for *time*. However, now there is a fixed-effect for
+*group* and an interaction term ($\beta_3$ term) that is multiplied by a
+dummy variable such that:
+
+$$
+\begin{equation*}
+   G = \begin{cases}
+      0, & control \\ 
+      1, & treatment
+      \end{cases}
+\end{equation*}
+$$
+
+giving,
+
+$$
+\begin{equation}
+   y_{ij} = b_{0i} + \beta_1 time_{ij} + \beta_2 group_i + 
+     \beta_3 (group_i \times time_{ij}) * G + \epsilon_{ij},
+\end{equation}
+$$
+
+```{r fit2}
+fit2 <- fit_lme_safely(yij ~ time * Group, random = ~ 1 | pid,
+                       data = GroupResponseData)
+```
+
+## Check Subject-specific Linear Models with `lmList`
+
+It can be a good idea to check the variation on the coefficients of
+subject-specific linear fits of the data. The
+`SomaMixedEffects::lmeDiagnostic()` function generates diagnostic plots
+of linear models for each of the *i* subjects.
+
+```{r diag, fig.width = 9, fig.height = 5}
+lmeDiagnostic(fit2)
+```
+
+Notice that the subject-subject offsets ($\beta_0$) are approximately
+centered about 1000 (RFU) for both treatment and control (as they should
+be; we set them to the same intercept), and a vertical line up from 1000
+would cross the confidence interval for most subjects. The more variable
+the estimates (and intervals) of $\beta_0$ seen in the left panel, the
+greater the improvement in model fit can be found in fitting
+subject-specific offsets in a mixed-effects model framework. Secondly,
+as can be expected, the slope coefficient ($\beta_1$) is vastly
+different between treated and control. Depending on the statistical
+question, subject-specific slopes may be desired (but typically not for
+longitudinal time-series data in a clinical setting).
+
+## Summary
+
+```{r coef2, echo = FALSE}
+# Invisible
+tmp <- summary(fit2)$tTable
+b0  <- round(tmp["(Intercept)", "Value"], 2)
+b1  <- round(tmp["time", "Value"], 2)
+b2  <- round(tmp["Grouptreatment", "Value"], 2)
+b3  <- round(tmp["time:Grouptreatment", "Value"], 2)
+t1  <- round(tmp["time:Grouptreatment", "t-value"], 2)
+```
+
+```{r fit2_summary}
+summary(fit2)
+```
+
+From the fixed-effects column in `Value`, the estimates are reasonably
+close to the original parameters:
+
+- $\hat{\beta_0}=$ `r b0`
+- $\hat{\beta_1}=$ `r b1` (essentially zero).
+
+This indicates that the effect of time has no effect on $y_{ij}$ (at
+least for the controls!). The significant **interaction** tells a
+different story and indicates that the **entire** fixed-effect for
+*time* occurs in the *treatment* group, $\hat{\beta_3}=$ `r b3`; in this
+case the *control* group does not vary with time.
+
+
+----------
+
+# Example 3
+
+To illustrate how the model output is constructed, we simulate
+identically to the above, however give the control group a slope of
+$\beta_1 = 250$. This results in a significant fixed-effect for time
+*and* an significant interaction; the additional effect of being in the
+*treatment* group. Relate the values back to the original Eqn\~**X** above in
+Example 2 to see how the terms are partitioned.
+
+```{r plot_long_combined3, fig.width = 12, fig.height = 6, warning = FALSE}
+# simulate longitudinal data with group-specific response
+p1 <- list(nsubj = 20, beta1 = 250, max.obs = 10, r.seed = 10,
+           sd.pars = list(sigma = 150), auto.cor = 0.1)
+p2 <- list(nsubj = 20, beta1 = 500, max.obs = 10, r.seed = 101,
+           sd.pars = list(sigma = 350), auto.cor = 0.1)
+GroupResponseData2 <- createLongData(control = p1, treatment = p2)
+GroupResponseData2 |>
+  ggplot(aes(x = time, y = yij, group = pid, colour = pid)) +
+  geom_line() +
+  geom_point(size = 4, shape = 21, fill = "white") +
+  ylab(y_lab) +
+  guides(colour = guide_legend(ncol = 2)) +
+  facet_wrap(vars(Group)) +
+  ggtitle(bquote(y[ij]~"~"~time))
+```
+
+```{r fit3}
+fit3 <- fit_lme_safely(yij ~ time * Group, random = ~ 1 | pid,
+                       data = GroupResponseData2)
+summary(fit3)
+```
+
+```{r coef3, echo = FALSE}
+# Invisible
+tmp <- summary(fit3)$tTable
+b0  <- round(tmp["(Intercept)", "Value"], 2L)
+b1  <- round(tmp["time", "Value"], 2L)
+b2  <- round(tmp["Grouptreatment", "Value"], 2L)
+b3  <- round(tmp["time:Grouptreatment", "Value"], 2L)
+t2  <- round(tmp["time:Grouptreatment", "t-value"], 2L)
+```
+
+Notice that the $\hat{\beta_0}=$ `r b0` has not changed, as we haven't
+changed any baseline values, but now half of the effect has moved into
+the *time* effect ($\hat{\beta_1}=$ `r b1`), and away from the
+interaction coefficient ($\hat{\beta_3}=$ `r b3`) which was carrying the
+entire slope effect for the treatment group. Stated alternatively, the
+significance of the interaction has dropped, though still a significant
+$p-$value, shifting from `r t1` to `r t2`.
+
+------------
+
+
+# Notes
+
+## Mixed-effects Analysis Guidelines
+
+Below are some initial guidelines for the implementation of linear
+mixed-effects modeling in `R`.
+
+1. Make sure you are fitting the correct model for your desired
+   question.
+1. Be sure you can write the full equation for the model(s) you are fitting.
+1. A wrapper for `nlme::lme()` to avoid convergence failures to stop
+   your code from running to completion can be found via
+   `SomaMixedEffects::fit_lme_safely()`.
+1. Prior to model fitting, plot the subject-specific coefficients with
+   the diagnostic wrapper `SomaMixedEffects::lmeDiagnostic()`.
+1. The `lme()` function uses Expectation Maximization combined with
+   Newton-Raphson iterations to fit the various model coefficients.
+1. See also: `SomaMixedEffects::fitMixedEffectsModels()` and
+   `SomaMixedEffects::createMixedEffectsTable()`.
+
+## Pitfalls
+
+- **Mike Hinterberg**: effects are fit sequentially according to the
+  magnitude of the effect.
+- others?
+
+------------
+
+Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
+(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.
