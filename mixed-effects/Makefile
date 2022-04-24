@@ -18,7 +18,7 @@ PDFLATEX = pdflatex
 	$(PDFLATEX) $*
 
 %.html: %.Rmd
-	$(RSCRIPT) -e "rmarkdown::render('$*.Rmd')"
+	$(RSCRIPT) -e "rmarkdown::render('$*.Rmd', quiet = TRUE)"
 
 %.tex: %.Rnw
 	$(RSCRIPT) -e "library(knitr); knit('$*.Rnw')"
