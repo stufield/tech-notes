@@ -90,14 +90,14 @@ written in terms of probabilities,
 
 $$
 \begin{equation}
+  \tag{1}
   P(outcome\ |\ data) = \frac{P(data\ |\ outcome) \times P(outcome)}{P(data)}
-  (\#eq:binom)
 \end{equation}
 $$
 
 where the term $P(data)$ is a normalizing constant that is independent of the
 *outcome*, and is often ignored if *relative* posteriors are desired
-over *absolute* posteriors. Equation~\@ref(eq:binom) then simplifies to,
+over *absolute* posteriors. Equation (tag:1) then simplifies to,
 
 $$
 \begin{equation}
@@ -143,7 +143,8 @@ probability density function (PDF) given class-specific parameters
 $\mu$ and $\sigma$:
 
 $$
-\begin{eqnarray} \label{eqn:pdf}
+\begin{eqnarray}
+  \tag{pdf}
    f(x\ |\ \mu_k,\sigma_k) &= \frac{1}{\sqrt{2\pi\sigma_k^2}} \; exp\Bigg( \frac{-(x-\mu_k)^2}{2\sigma_k^2} \Bigg),
 \end{eqnarray}
 $$
@@ -152,19 +153,20 @@ To classify an unknown sample with $p$ feature measurements
 ($\vec x = x_1,...,x_p$) and $k$ classes, calculate the following:
 
 $$
-\begin{eqnarray} \label{eqn:bayes}
+\begin{eqnarray} \tag{bayes}
    P(k\ |\ \vec x) &= 
       \Bigg[ \prod_{i=1}^{p} \frac{1}{\sqrt{2\pi\sigma_{ik}^2}} \; exp\Bigg( \frac{-(x_i-\mu_{ik})^2}{2\sigma_{ik}^2} \Bigg) \Bigg] \times P(k),
 \end{eqnarray}
 $$
 
-The result of equation~\eqref{eqn:bayes} gives a probability *density* for
+The result of Equation (tag:bayes) gives a probability *density* for
 each class, which is not constrained on the interval $[0,\ 1]$.
 Normalized posterior probabilities ($Pr$) are obtained by calculating the
 class-specific proportion of the total density,
 
 $$
-\begin{eqnarray} %\label{eqn:bayes_prob}
+\begin{eqnarray} 
+  \tag{bayes_prob}
   Pr(k=j\ |\ \vec x) &=& \frac{P(j\ |\ \vec x)}{\sum_{i=1}^k P(i\ |\ \vec x)}
 \end{eqnarray}
 $$
@@ -248,7 +250,7 @@ $$
 
 **Normalized Posterior Probabilities:**
 
-From equation~\eqref{eqn:bayes_prob}, the relative proportion of each density is:
+From Equation (tag:bayes_prob), the relative proportion of each density is:
 
 $$
 \begin{eqnarray*}

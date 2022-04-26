@@ -143,6 +143,7 @@ Effect Size ($\delta$) Calculation:
 
 $$
 \begin{equation}
+  \tag{1}
   \def \mysigma{\hat{\sigma}^2}
   \delta = \frac{\hat{\mu_1} - \hat{\mu_2}}{\sqrt{\mysigma_{p}}}
 \end{equation}
@@ -178,6 +179,7 @@ $$
 
 
 ## Alternate formulation
+
 It is often convenient when working in RFU space to think in terms of
 percent distance and relative measures of variance, e.g. coefficient of
 variance (CV). This generates the following alternative formulation which
@@ -203,8 +205,8 @@ which brings us to an alternative sample size calculations:
 
 $$
 \begin{equation}
+  \tag{2}
   N = \bigg( \frac{Z_{1-\alpha} + Z_\beta}{d_1} \bigg)^2 \cdot 2cv_1^2 
-  \quad\quad\quad\quad (1)
 \end{equation}
 $$
 or
@@ -265,8 +267,9 @@ plotPowerCurves(effect = seq(1.5, 3.5, 0.1), power.vec = seq(0.5, 0.9, 0.05))
 **Fig. 1**: Power curves based on analytical solutions of a two group
 comparison (t-test) showing the number of samples (per group) required to 
 reliably detect varying effect sizes (in standard deviation units).
-In this calculation, significance threshold ($\alpha$) has been Bonferroni
-corrected (i.e. $0.05/1129 =$ `r format(0.05/1129, digits = 4, scientific = FALSE)`),
+In this calculation, significance threshold ($\alpha$) has been
+Bonferroni corrected
+(i.e. $0.05/1129 =$ `r format(0.05/1129, digits = 4, scientific = FALSE)`),
 which may be considered highly conservative.
 
 Notice that in **Fig. 1**, experiments with the *smallest* number of
@@ -275,7 +278,7 @@ and high false negative rate (i.e. low power) whereas experiments with
 small effect size and high power require the *highest* sample numbers.
 
 Alternatively, one can generate power curves based on the formulation
-in **Eqn 1.**, where the *relative* differences in the means based on %CV
+in **Equation** (tag:2), where the *relative* differences in the means based on %CV
 are considered. This can be explored via the accompanying file
 `SomaLogic_sample_size_technical_note_v1.xlsx`.
 
