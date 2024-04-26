@@ -15,12 +15,16 @@ editor_options:
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment  = "#>"
-)
 library(ggplot2)
 library(SomaMixedEffects)
+knitr::opts_chunk$set(
+  fig.align  = "center",    # alignment for figures; left, right, center
+  comment    = ">",         # return comment of source code
+  eval       = TRUE,        # evaluate the chunk?
+  collapse   = TRUE,        # collapse code chunks by default?
+  include    = TRUE,        # should the chunk be included as output?
+  tidy       = FALSE        # should output be cleaned up?
+)
 y_lab <- bquote("Response ("*y[ij]*")")
 ```
 
