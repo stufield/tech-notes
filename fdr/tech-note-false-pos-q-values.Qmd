@@ -1,48 +1,56 @@
 ---
-title: "Technical note: False Positive & q-values"
+title: "Mind Your P's & Q's"
 author: "Stu Field"
-date: "`r format(Sys.Date(), '%e %B %Y')`"
-output:
-  html_document:
-    code_folding: show
-    number_sections: yes
-    toc: yes
-    toc_float:
-      collapsed: no
-editor_options: 
-  markdown: 
-    wrap: 72
-  chunk_output_type: console
+date: today
+date-format: "D MMMM YYYY"
+format:
+  gfm:
+    preview-mode: raw
+# output:
+#   html_document:
+#     code_folding: show
+#     number_sections: yes
+#     toc: yes
+#     toc_float:
+#       collapsed: no
 ---
 
-```{r setup, include = FALSE}
+```{r}
+#| label: setup
+#| include: FALSE
 knitr::opts_chunk$set(
- collapse = TRUE,
- comment = "#>"
+  collapse = TRUE,
+  comment  = "#>",
+  fig.path = "figures/fdr-"
 )
-par.def <- list(mar = c(5, 5, 3, 1), mgp = c(3.5, 0.75, 0))
-col_alpha   <- ggplot2::alpha
+par_def <- list(mar = c(5, 5, 3, 1), mgp = c(3.5, 0.75, 0))
+col_alpha <- ggplot2::alpha
 addBox <- function(bottom = NULL, top = NULL, left = NULL, right = NULL,
-                   col, col_alpha = 0.2, ...) {
-  if ( is.null(bottom) ) 
-    bottom <- par("usr")[3L]
-  if ( is.null(left) ) 
-    left <- par("usr")[1L]
-  if ( is.null(top) ) 
-    top <- par("usr")[4L]
-  if ( is.null(right) ) 
-    right <- par("usr")[2L]
-  rect(left, bottom, right, top, border = NA, col = col_alpha(col,  col_alpha), ...)
+                   col, alpha = 0.2, ...) {
+  pars <- par("usr")
+  if ( is.null(bottom) )
+    bottom <- pars[3L]
+  if ( is.null(left) )
+    left <- pars[1L]
+  if ( is.null(top) )
+    top <- pars[4L]
+  if ( is.null(right) )
+    right <- pars[2L]
+  rect(left, bottom, right, top, border = NA, col = col_alpha(col, alpha), ...)
 }
-plotPolygon <- function(upper, lower, add = FALSE, col = col_alpha("blue", 0.5), ...) {
-  stopifnot(inherits(upper, "list"), length(upper) == 2,
-            inherits(lower, "list"), length(lower) == 2)
+
+plotPolygon <- function(upper, lower, add = FALSE,
+                        col = col_alpha("blue", 0.5), ...) {
+  stopifnot(
+    inherits(upper, "list"), length(upper) == 2L,
+    inherits(lower, "list"), length(lower) == 2L
+  )
   x1 <- upper[[1L]]
   y1 <- upper[[2L]]
   x2 <- lower[[1L]]
   y2 <- lower[[2L]]
   if ( !add ) {
-    plot(x1, y1, type = "n", ylim = c(min(y1, y2), 
+    plot(x1, y1, type = "n", ylim = c(min(y1, y2),
          max(y1, y2)), xlim = c(min(x1, x2), max(x1, x2)), ...)
   }
   polygon(c(x1, rev(x2)), c(y1, rev(y2)), border = NA, col = col)
@@ -50,12 +58,13 @@ plotPolygon <- function(upper, lower, add = FALSE, col = col_alpha("blue", 0.5),
 
 addText <- function(x, y, text, pos = 4, ...) {
   if ( length(x) > 1 || length(y) > 1 || length(text) > 1 ) {
-    if ( !(length(x) == length(y) && length(y) == length(text)) )
-      stop("The `x`, `y`, and `text` arguments should all be of equal length.", 
+    if ( !(length(x) == length(y) && length(y) == length(text)) ) {
+      stop("The `x`, `y`, and `text` arguments should all be of equal length.",
            call. = FALSE)
+    }
   }
-  plot_x <- par("usr")[1:2]
-  plot_y <- par("usr")[3:4]
+  plot_x <- par("usr")[1:2L]
+  plot_y <- par("usr")[3:4L]
   new_x <- x * (max(plot_x) - min(plot_x)) + min(plot_x)
   new_y <- y * (max(plot_y) - min(plot_y)) + min(plot_y)
   if ( par("xlog") ) {
@@ -74,32 +83,35 @@ addText <- function(x, y, text, pos = 4, ...) {
 
 # What are false-positives?
 
-A false-positive finding in an experiment occurs when you conclude that
-some covariate or predictor variable has an effect on a response variable
-when in fact it does not. There is a risk of this occurring in all
-experiments, but they can be a particular problem when tests are done on
-many of variables (100's or 1000's), which happens in proteomics, genomics,
-transcriptomics, or metabolomics.
+A false-positive finding in an experiment occurs when you conclude that some
+covariate or predictor variable has an effect on a response variable when in
+fact it does not. There is a risk of this occurring in all experiments, but
+they can be a particular problem when tests are done on many of variables
+(100's or 1000's), which happens in proteomics, genomics, transcriptomics, or
+metabolomics.
 
 
 # Why are q-values important?
 
 To see how false discoveries arise, consider an experiment in which there
 is no treatment effect on any of the variables measured. In this case,
-any positive findings *must* be false. For each of the many variables,
+any positive findings _must_ be false. For each of the many variables,
 we will have calculated a p-value. What will these p-values look like?
 They will appear similar to **Fig. 1**; a uniform distribution
 evenly spread between $0\to1$, with 5% of them less than $p=0.05$.
 You are as likely to obtain a p-value of 0.01 as 0.99. This means that
 if you perform 1000 statistical tests, you can expect 50 significant
-results *by chance* alone. These are the 5% false-positives present in
+results _by chance_ alone. These are the 5% false-positives present in
 every experiment, and they cannot be reduced by a bigger, better experiment,
 or a more careful analysis. False discovery rates (FDRs) and q-values are
 a way of quantifying this problem (and alleviating it).
 
 
-```{r null, fig.width = 12, fig.height = 6}
-par(par.def)
+```{r}
+#| label: null-dist
+#| fig.width: 12
+#| fig.height: 6
+par(par_def)
 x <- seq(0, 1, 0.1)
 y <- seq(0, 1.2, 0.2)
 plot(NA, type = "n", xaxt = "n", yaxt = "n",
@@ -107,14 +119,14 @@ plot(NA, type = "n", xaxt = "n", yaxt = "n",
      xaxs = "i", yaxs = "i", ylim = range(y), xlim = range(x))
 axis(1, labels = x, at = x, cex.axis = 1.5)
 axis(2, labels = y, at=y, las = 2, cex.axis = 1.5)
-addBox(top = 1, col = "blue", col_alpha = 0.5)
-addBox(top = 1.2, bottom = 1, col = "gray", col_alpha = 0.7)
+addBox(top = 1, col = "blue", alpha = 0.5)
+addBox(top = 1.2, bottom = 1, col = "gray", alpha = 0.7)
 ```
 
 **Fig 1.**: Distribution of p-values when there is no effect
 (i.e. the null hypothesis).
 
-Now suppose that we have an experiment where the treatments *do* have
+Now suppose that we have an experiment where the treatments _do_ have
 an effect on some of the variables. Let us suppose that 20% of them are
 affected (although we do not know this in advance). For the 80% which
 are unaffected, their p-values will be evenly spread between $0\to1$.
@@ -122,16 +134,19 @@ For the 20% which are affected, the p-values will have a distribution
 skewed towards the lower end of the $0\to1$ range. This means that the
 total distribution of p-values looks like **Fig. 2** below:
 
-```{r null-alt, fig.width = 12, fig.height = 6}
+```{r}
+#| label: null-alt
+#| fig.width: 12
+#| fig.height: 6
 basefig <- function(y = seq(0, 2, 0.2), ...) {
-  par(par.def)
+  withr::local_par(par_def)
   plot(NA, xlim = 0:1, ylim = range(y), type = "n", xaxt = "n", yaxt = "n",
        ylab = "Frequency Distribution", xlab = "p-value",
        cex.lab = 2, xaxs = "i", yaxs = "i", ...)
   axis(1, labels = x, at = x, cex.axis = 1.5)
   axis(2, labels = y, at = y, las = 2, cex.axis = 1.5)
-  addBox(bottom = 0.8, col = "gray", col_alpha = 0.7)
-  addBox(top = 0.8, col = "blue", col_alpha = 0.5)
+  addBox(bottom = 0.8, col = "gray", alpha = 0.7)
+  addBox(top = 0.8, col = "blue", alpha = 0.5)
   legend("topright", legend = c("Effect", "No effect"), pch = 15,
          bg = "white",  col = c(col_alpha("red", 0.25), col_alpha("blue", 0.25)),
          inset = 0.02, cex = 1.5, pt.cex = 2)
@@ -142,7 +157,7 @@ beta  <- 1
 yvals <- beta * (exp(xvals * alpha)) + 0.8
 basefig()
 plotPolygon(list(xvals, yvals), list(x, rep(0.8, length(x))),
-            add = T, col = col_alpha("red", 0.5))
+            add = TRUE, col = col_alpha("red", 0.5))
 ```
 
 **Fig 2.**: Distribution of p-values when some (20%) variables are
@@ -156,7 +171,10 @@ variables into 4 types (**Fig. 3**). The q-value is the proportion of variables
 chosen as positive (left of the dotted-line) which are false-positives.
 In **Fig. 3**, it is ~50% for the cutoff shown.
 
-```{r p-cutoff, fig.width = 12, fig.height = 6}
+```{r}
+#| label: p-cutoff
+#| fig.width: 12
+#| fig.height: 6
 basefig()
 plotPolygon(list(xvals, yvals), list(x, rep(0.8, length(x))),
             add = TRUE, col = col_alpha("red", 0.5))
@@ -176,7 +194,7 @@ Now that we have a q-value, we can either use it to quantify the
 false-positive problem by estimating what percentage of the variables
 declared to be affected are in fact unaffected. Or by choosing a q-value
 which we consider acceptable (q-value cutoff), use that to determine the
-p-value cutoff to use -- it does *not* have to be 5%! It may be
+p-value cutoff to use -- it does _not_ have to be 5%! It may be
 asked at this point that having quantified the false-positives, can we
 not say which ones they are? Unfortunately this not possible. It is like
 trying to design a fire alarm which makes a different sound depending on
@@ -198,7 +216,8 @@ the blue box ($\sim0.8$). If there are truly no p-values coming from the
 alternate distribution, this intercept will be $\sim1.0$ as in
 **Fig. 1**. There are many statistical tools in various programs
 to perform this, in the statistical environment R, there is a package
-simply called `qvalue` available from `Bioconductor`.
+simply called `qvalue` available from
+[Bioconductor](https://www.bioconductor.org/).
 
 # What about false-negatives?
 
@@ -212,7 +231,10 @@ shown in **Fig. 4**; there are no more affected variables, the red area is the
 same, but we are more likely to detect them. We have reduced the q-value
 to ~35% for the same cutoff ($p = 0.125$).
 
-```{r power, fig.width = 12, fig.height = 6}
+```{r}
+#| label: power
+#| fig.width: 12
+#| fig.height: 6
 basefig(y = seq(0, 2.8, 0.2))
 alpha <- -9.5
 beta  <- 1.8
@@ -241,19 +263,67 @@ of p-values and rephrases the question to answer:
 "of the significant tests (for a given cutoff), what proportion are expected
 to be from the null distribution" (i.e. false-positives)?
 
+--------------
+
+# Code Reference
+```{r}
+#| eval: FALSE
+#| label: code
+par_def <- list(mar = c(5, 5, 3, 1), mgp = c(3.5, 0.75, 0))
+
+col_alpha <- ggplot2::alpha
+
+addBox <- function(bottom = NULL, top = NULL, left = NULL, right = NULL,
+                   col, alpha = 0.2, ...) {
+  pars <- par("usr")
+  if ( is.null(bottom) )
+    bottom <- pars[3L]
+  if ( is.null(left) )
+    left <- pars[1L]
+  if ( is.null(top) )
+    top <- pars[4L]
+  if ( is.null(right) )
+    right <- pars[2L]
+  graphics::rect(left, bottom, right, top, border = NA,
+                 col = col_alpha(col, alpha), ...)
+}
+
+plotPolygon <- function(upper, lower, add = FALSE,
+                        col = col_alpha("blue", 0.5), ...) {
+  x1 <- upper[[1L]]
+  y1 <- upper[[2L]]
+  x2 <- lower[[1L]]
+  y2 <- lower[[2L]]
+  if ( !add ) {
+    plot(x1, y1, type = "n", ylim = c(min(y1, y2),
+         max(y1, y2)), xlim = c(min(x1, x2), max(x1, x2)), ...)
+  }
+  graphics::polygon(c(x1, rev(x2)), c(y1, rev(y2)), border = NA, col = col)
+}
+
+addText <- function(x, y, text, pos = 4, ...) {
+  pars   <- par("usr")
+  plot_x <- pars[1:2L]
+  plot_y <- pars[3:4L]
+  new_x  <- x * (max(plot_x) - min(plot_x)) + min(plot_x)
+  new_y  <- y * (max(plot_y) - min(plot_y)) + min(plot_y)
+  if ( par("xlog") ) {
+    new_x <- 10^new_x
+  }
+  if ( par("ylog") ) {
+    new_y <- 10^new_y
+  }
+  text(new_x, new_y, text, pos = pos, ...)
+}
+```
+
 
 # References
 
 [Original source](cfile7.uf.tistory.com/attach/207D9A554D2FAEC6169E07)
 
 Storey, J. 2002. A direct approach to false discovery rates.
-*Journal of the Royal Society, B*. **64**:479--498.
+_Journal of the Royal Society, B_. **64**:479--498.
 
 Storey, J. and Tibshirani, R. 2002.
-Statistical significance for genomewide studies. *PNAS*. **100**:9440--9445.
-
-
-------
-
-Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
-(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.
+Statistical significance for genomewide studies. _PNAS_. **100**:9440--9445.
