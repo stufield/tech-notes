@@ -403,7 +403,11 @@ checkNaiveBayesBias <- function(likelihoods, max.lr = 1e04) {
   }
 }
 
-
+expand_grid <- function(...) {
+  tibble::as_tibble(
+    expand.grid(..., KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+  )
+}
 
 is.Integer <- function(x) all(floor(x) == x, na.rm = TRUE)
 calcRobustGaussFit <- function(x, mad = NULL) {
