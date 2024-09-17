@@ -113,11 +113,11 @@ robustNaiveBayes.default <- function(x, y, mad = FALSE, laplace = 0,
 
 
 #' @describeIn robustNaiveBayes
-#' S3 formula method for robustNaiveBayes.
+#'   S3 formula method for robustNaiveBayes.
 #' @param formula A model formula of the form: `class ~ x1 + x2 + ...`
-#' (no interactions).
+#'   (no interactions).
 #' @param data A data frame of predictors (categorical and/or numeric), i.e.
-#' the ADAT used to train the model.
+#'   the ADAT used to train the model.
 #' @export
 robustNaiveBayes.formula <- function(formula, data, ...) {
 
@@ -147,7 +147,7 @@ robustNaiveBayes.formula <- function(formula, data, ...) {
 
 
 #' @describeIn robustNaiveBayes
-#' S3 print method for robustNaiveBayes.
+#'   S3 print method for robustNaiveBayes.
 #' @export
 print.robustNaiveBayes <- function(x, ...) {
   cat("\nRobust Naive Bayes Classifier for Discrete Predictors\n\n")
@@ -167,23 +167,23 @@ print.robustNaiveBayes <- function(x, ...) {
 
 
 #' @describeIn robustNaiveBayes
-#' S3 predict method for robustNaiveBayes.
+#'   S3 predict method for robustNaiveBayes.
 #' @param object A model object of class `robustNaiveBayes`.
 #' @param newdata A `data.frame` with new predictors, containing at least
-#' the model covariates (but possibly more columns than the training data).
-#' Note that the column names of `newdata` are matched against the
-#' training data ones.
+#'   the model covariates (but possibly more columns than the training data).
+#'   Note that the column names of `newdata` are matched against the
+#'   training data ones.
 #' @param type If `"class"` (default), the class name with maximal
-#' posterior probability is returned for each sample, otherwise the
-#' conditional *a-posterior* probabilities for each class are returned.
-#' Additionally, if called from within the S3 plot method, a character
-#' string determining the plot type, currently either CDF or PDF (default).
-#' Argument can be shortened and is matched.
+#'   posterior probability is returned for each sample, otherwise the
+#'   conditional *a-posterior* probabilities for each class are returned.
+#'   Additionally, if called from within the S3 plot method, a character
+#'   string determining the plot type, currently either CDF or PDF (default).
+#'   Argument can be shortened and is matched.
 #' @param threshold Value below which should be replaced. See `min.prob`.
 #' @param min.prob Value indicating the minimum probability a prediction
-#' can take. See `threshold` argument.
+#'   can take. See `threshold` argument.
 #' @return `predict.robustNaiveBayes`: Depending on the `type` argument,
-#' the posterior probability of a robustly estimated naive Bayes model.
+#'   the posterior probability of a robustly estimated naive Bayes model.
 #' @examples
 #' # Predictions
 #' table(predict(m1, iris), iris$Species) # benchmark
@@ -373,12 +373,12 @@ plot.naiveBayes <- plot.robustNaiveBayes
 #' during the prediction of a naive Bayes model for a single sample.
 #'
 #' @param likelihoods A `matrix` or `tibble` class object with the
-#' rows as the possible classes (>= 2) and the columns as the features.
-#' Likelihoods should not yet be log-transformed and entries should be as they
-#' come from [dnorm()].
+#'   rows as the possible classes (>= 2) and the columns as the features.
+#'   Likelihoods should not yet be log-transformed and entries should be as they
+#'   come from [dnorm()].
 #' @param max.lr The threshold maximum allowed log-likelihood ratio.
 #' @return `checkNaiveBayesBias`: If excessive influence on likelihoods are
-#' detected a warning is triggered and the responsible feature(s) are flagged.
+#'   detected a warning is triggered and the responsible feature(s) are flagged.
 #' @author Stu Field
 #' @examples
 #' lik <- matrix(runif(6), ncol = 3)
@@ -428,4 +428,14 @@ calcRobustGaussFit <- function(x, mad = NULL) {
     control = nls.control(maxiter = 2000, minFactor = 1 / 1024, warnOnly = TRUE)
   )
   coefficients(fit)
+}
+
+burst_model_object <- function(model) {
+  for (f in names(model$tables)) {
+    tab <- model$tables[[f]]
+    assign(paste0(f, "_control_mu"), tab[1L], envir = .GlobalEnv)
+    assign(paste0(f, "_disease_mu"), tab[2L], envir = .GlobalEnv)
+    assign(paste0(f, "_control_sd"), tab[3L], envir = .GlobalEnv)
+    assign(paste0(f, "_disease_sd"), tab[4L], envir = .GlobalEnv)
+  }
 }
