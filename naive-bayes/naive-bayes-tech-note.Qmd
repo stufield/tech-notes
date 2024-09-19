@@ -20,9 +20,9 @@ format:
 #| include: FALSE
 library(ggplot2)
 knitr::opts_chunk$set(
- collapse = TRUE,
- comment  = "#>",
- fig.path = "figures/bayes-"
+  collapse = TRUE,
+  comment  = "#>",
+  fig.path = "figures/bayes-"
 )
 
 thm <- theme_bw() + 

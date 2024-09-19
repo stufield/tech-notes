@@ -1,29 +1,57 @@
----
-title: "Decision boundaries: Na&iuml;ve Bayes vs KNN"
-author: "Stu Field"
-date: "`r format(Sys.Date(), '%e %B %Y')`"
-output:
-  html_document:
-    code_folding: show
-    number_sections: yes
-    toc: yes
-    toc_float:
-      collapsed: no
-editor_options: 
-  markdown: 
-    wrap: 72
----
+# Decision boundaries: KKNN vs Naïve Bayes
+Stu Field
+19 September 2024
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
- collapse = TRUE,
- comment  = "#>"
-)
-source("robustNaiveBayes.R")
+------------------------------------------------------------------------
 
+# Overview
+
+It is sometimes nice to visualize the decision boundaries of various
+models. Here we compare 2 commonly used models: naïve Bayes and
+k-nearest neighbors.
+
+## KNN vs naïve Bayes
+
+Below are decision boundaries for 2 simulated data sets using K-Nearest
+Neighbors and naïve Bayes models. For the first data set (top row) the
+true boundary is simulated such that disease (red) protein 1 $> 44$ and
+protein 2 $> 74$, these the data are simulated with an unrealistic harsh
+cutoff to form the classes (unrealistic). The lower 2 panels are more
+realistic data simulated from bivariate normal distributions and show
+the difference in the boundary between the two methods.
+
+``` r
+par_def <- list(mgp = c(2.00, 0.75, 0.00), mar = c(3, 4, 3, 1))
+par(par_def)
+par(mfrow = c(2L, 2L))
+plot_decision_boundary(fake_data(), res = 50, model.type = "knn")
+plot_decision_boundary(fake_data(), res = 50, model.type = "bayes")
+plot_decision_boundary(fake_data2(), res = 50, model.type = "knn")
+plot_decision_boundary(fake_data2(), res = 50, model.type = "bayes")
+```
+
+![](figures/kknn-bayes-knn-vs-bayes-1.png)
+
+## Choosing *k* in KNN
+
+``` r
+par(mfrow = c(3L, 3L))
+for ( i in 2:10 ) {
+  plot_decision_boundary(fake_data(), res = 50, model.type = "knn", k = i)
+}
+```
+
+![](figures/kknn-bayes-knn-k-1.png)
+
+------------------------------------------------------------------------
+
+### Code Reference
+
+``` r
 fake_data <- function(a = 3, b = 2.14, sd = 250, pts = 200) {
   withr::local_seed(1001)
-  # y.det <- a*x^b   # deterministic model
+  # deterministic model
+  # y.det <- a*x^b   
   # y <- rnorm(length(y.det), mean = y.det, sd = sd) # stochastic 'y'
   df <- data.frame(x1 = rnorm(pts, 45, 2), x2 = rnorm(pts, 75, 2))
   Response <- rep("disease", pts)
@@ -39,13 +67,13 @@ fake_data2 <- function(pts = 100) {
   list(x = df, y = factor(rep(c("control", "disease"), each = pts)))
 }
 
-# ----------------------------
+
 # Calculate KNN bivariate results
-# ----------------------------
+#'
+#' @param X data matrix
+#' @param newdata new predictors to predict on
+#' @param y response vector
 predict_bivariate_knn <- function(X, newdata, y, k, ...) {
-  # X: data matrix
-  # newdata: new predictors to predict on
-  # y: response vector
   if ( k < 2L ) {
     stop("Neighborhood (k) must be >= 1: ", k, call. = FALSE)
   }
@@ -93,10 +121,10 @@ predict_bivariate_knn <- function(X, newdata, y, k, ...) {
   do.call(rbind, ret)
 }
 
-# ------------------------
-# plot a bivariate decision boundary
-# ------------------------
-plot_decision_boundary <- function(data, res = 100, model.type = c("knn", "bayes"),
+#' plot a bivariate decision boundary
+#'
+#' @param res Resulution for the plot.
+plot_decision_boundary <- function(data, res = 50, model.type = c("knn", "bayes"),
                                    k = 15, line.col = "darkviolet", lwd = 2,
                                    lty = 2, contours = 0.5, fast = FALSE) {
   model.type <- match.arg(model.type)
@@ -140,50 +168,3 @@ plot_decision_boundary <- function(data, res = 100, model.type = c("knn", "bayes
   invisible(data)
 }
 ```
-
-
-----------
-
-
-# Overview
-
-It is sometimes nice to visualize the decision boundaries of various models.
-Here we compare 2 commonly used models: na&iuml;ve Bayes and k-nearest neighbors.
-
-
-
-## KNN vs na&iuml;ve Bayes
-
-Below are decision boundaries for 2 simulated data sets using
-K-Nearest Neighbors and na&iuml;ve Bayes models.
-For the first data set (top row) the true boundary is
-simulated such that disease (red) protein 1 $> 44$ and protein 2 $> 74$,
-these the data are simulated with an unrealistic harsh cutoff to form
-the classes (unrealistic). The lower 2 panels are more realisitic data
-simulated from bivariate normal distributions and show the difference
-in the boundary between the two methods.
-
-
-```{r knn-vs-bayes, fig.width = 10, fig.height = 10}
-par(mfrow = c(2, 2))
-par(list(mgp = c(2.00, 0.75, 0.00), mar = c(3, 4, 3, 1)))
-plot_decision_boundary(fake_data(), res = 175, model.type = "knn")
-plot_decision_boundary(fake_data(), res = 175, model.type = "bayes")
-plot_decision_boundary(fake_data2(), res = 175, model.type = "knn")
-plot_decision_boundary(fake_data2(), res = 175, model.type = "bayes")
-```
-
-## Choosing *k* in KNN 
-
-```{r knn-k, fig.width = 10, fig.height = 10}
-par(list(mgp = c(2.00, 0.75, 0.00), mar = c(3, 4, 3, 1)))
-par(mfrow = c(3, 3))
-for ( i in 2:10 ) {
-  plot_decision_boundary(fake_data(), res = 175, model.type = "knn", k = i)
-}
-```
-
-------
-
-Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
-(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.
