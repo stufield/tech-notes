@@ -13,6 +13,11 @@ PDFLATEX = pdflatex
 .PRECIOUS: Makefile
 .PHONY: clean
 #########################
+
+mixed-samples:
+	$(RSCRIPT) mixed-samples-plot.R
+
+
 %.pdf: %.tex
 	$(PDFLATEX) $*
 	$(PDFLATEX) $*
@@ -24,5 +29,5 @@ PDFLATEX = pdflatex
 	$(RSCRIPT) -e "library(knitr); knit('$*.Rnw')"
 
 clean:
-	$(MV) *.log *.aux *.toc *.blg *.bbl *.out /tmp
+	$(RM) *.log *.aux *.toc *.blg *.bbl *.out
 
