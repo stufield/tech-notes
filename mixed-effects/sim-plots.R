@@ -9,7 +9,7 @@ create_fake_long_data <- function() {
                on.exit(rm(.Random.seed, envir = .GlobalEnv))
                control$beta1 <- 0
                treated$beta1 <- t.beta1[i]
-               SomaMixedEffects::createLongData(control, treated)
+               mixr::createLongData(control, treated)
           })
   sim_list <- purrr::map2(sim_list, seq(length(sim_list)), function(x, y) {
                names(x)[ which(names(x) == "yij") ] = sprintf("SOMAmer_%02i", y)
@@ -60,8 +60,8 @@ create.mixed.models.table <- function(X) {
 run <- function() {
   on.exit(rm(.Random.seed, envir = .GlobalEnv))
   fake.long.adat <<- create_fake_long_data()
-  fake.models <<- SomaMixedEffects(fake.long.adat)
-  fake.mm.table <<- SomaMixedEffects::createMixedModelsTable(fake.models)
+  fake.models <<- mixr(fake.long.adat)
+  fake.mm.table <<- mixr::createMixedModelsTable(fake.models)
   fake.mm.plots <<- lapply(rownames(fake.mm.table), function(.x)
                    mixedEffectsPlots(fake.long.adat, response = .x,
                                      time = "time", ID = "pid", group = "SampleGroup"))
