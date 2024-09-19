@@ -1,51 +1,65 @@
-# ----------------------------------- #
-# Stu's cheat sheet of UNIX commands
-# ----------------------------------- #
-#         symbolic links
-# ----------------------------------- #
+# Linux Cheat Sheet of (Ubuntu) Commands
+========================
+
+
+## Symbolic Links
+
+```bash
 ln -sf [target] [location]         # soft link
 ln -Lf [target] [location]         # hard link
+```
 
-# ------------------ #
-# VIM
-# ------------------ #
-# rebuild vim spellfile
+## VIM
+### rebuild vim spellfile
+
+```bash
 :mkspell! ~/.vim/spell/en.utf-8.add
+```
 
-# multiple buffer search/replace
+### Multiple buffer search/replace
+```bash
 :bufdo %s/<pattern>/<replace>/ge | update
+```
 
-# -------------------------------- #
-# Check System Status CRON
-# -------------------------------- #
+
+## Check System Status CRON
+
+```bash
 systemctl status cron
+```
 
-# ------------------------ #
-# Finding
-# ------------------------ #
+
+## Finding
+
+```bash
 find [path] -name [*pattern*]       # find filenames matching the quote string from current root
 grep -r [pattern] [file]            # find a search string inside files and list them
      -i   find a search string inside files and list them (case insensitive)
      -l    find a search string inside files and list only the files that contain them
 grep [pattern] $(find [path] -type f -name [file pattern])   # grep for string only in certain files from find
 grep [pattern] **/*.R               # via Z-shell
-# open in VIM as buffers
+```
+
+- open in VIM as buffers
+```bash
 vi $(grep -lr [pattern] *)
 vi $(grep -lr [pattern] `find -name *.R`)
 vi $(grep -l [pattern] **/*.R)   # using Z-shell
+```
 
 
-# ----------------------------------- #
-# mounting drives
-# ----------------------------------- #
+## Mounting drives
+
+```bash
 sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/shared /media/S
 sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/res_dev /media/R
 sudo mount -t cifs -o "username=sfield,password=*********,uid=sfield,gid=sfield" //aspen/home/sfield /media/H
+```
 
 
-# ----------------------------------- #
-# BASH tricks
-# ----------------------------------- #
+## BASH tricks
+
+```bash
 cd -  OR cd $OLDPWD               # go back to previous directory
 touch blahfile{1,2,3}.txt         # create multiple files
 mv blahfile{1,one}.txt            # rename file with old/new name
@@ -64,30 +78,34 @@ echo $?                           # return value of last command
 touch filename1 filename2
 mkdir destination
 mv !touch^ !$
+```
 
 
-# ----------------------------------- #
-# Trailing/Leading Spaces
-# ----------------------------------- #
+## Trailing/Leading Spaces
+
+```bash
 gsub("[[:space:]]*$", "", x)
 gsub("^[[:space:]]*", "", x)
+```
 
 
-# -------------------------------------------- #
-# Trailing Tabs
-# -------------------------------------------- #
+## Trailing Tabs
+
+```bash
 :%s/\s\+$//
+```
 
 
-# -------------------------------------------- #
-# Use grouping grep
-# -------------------------------------------- #
+## Use grouping grep
+
+```bash
 gsub("^(.+)(SL[0-9]+_[0-9][a-z]).+$", "\\2", "data/CalibratorReference.SL14386_9f.txt")
+```
 
 
-# -------------------------------- #
-# chmod + chown
-# -------------------------------- #
+## chmod + chown
+
+```bash
 u = user
 g = group
 o = others
@@ -113,11 +131,12 @@ chown sfield:sfield file          change ownership permissions
 2 = -w-
 1 = --x
 0 = ---
+```
 
 
-# -------------------------------- #
-# Lists
-# -------------------------------- #
+## Lists
+
+```bash
 du -sch *          size of directory
 ls -l | wc          size and number of visible files in current directory
 ls -a | wc          size and number of ALL files in current directory
@@ -125,28 +144,31 @@ ls -l | wc -l       how many visible files in current directory
 ls -a | wc -l       how many TOTAL files in current directry
 ls -alS             list all files by size
 ls -dl filename     get permissions for a file
+```
 
 
-# ----------------------------------- #
-# Trash
-# ----------------------------------- #
+## Trash
+
+```bash
 ~/.local/share/Trash/files
+```
 
 
-# -------------------------------- #
-# Zip
-# -------------------------------- #
+## Zip
+
+```bash
 zip filename.zip file1 file2 file3 ...
 zip -e filename.zip file1 file2 file3 ...  (with password)
 unzip filename.zip                         unzip file
 unzip filename.zip -d dirname              unzip file to a directory
 unzip -l filename.zip                      list contents of zip file
 unzip -l filename.zip | vi -               list contents of zip file to vi
+```
 
 
-# -------------------------------- #
-# Tar
-# -------------------------------- #
+## Tar
+
+```bash
 tar -cvzf filename.tar.gz file1 file2 file3 ...   tar first, then zip
 tar -cvf filename.tar file1 file2 file3  ...      just tarball
 tar -xvf filename.tar                             untar to current directory
@@ -154,33 +176,39 @@ tar -xvf filename.tar -C dirname/                 untar to specified directory
 gunzip filename.tar.gz                            unzip the tarball, create tarball
 tar -tvf filename.tar                             list contents of tarball
 tar -ztvf filename.tar.gz                         list contents of zipped tarball
+```
 
 
-# -------------------------------- #
-# replacing text in files
+# Replacing text in files
 # based on search pattern
-# -------------------------------- #
-for i in *Rd; do sed -e "s/string/replace/" $i > fixed/$i; done
+
+```bash
+for i in *.txt
+  do sed -e "s/string/replace/" $i > fixed/$i
+done
+```
 
 
-# -------------------------------- #
-# look for running processes
-# -------------------------------- #
+## Running processes
+
+```bash
 ps -ef | grep "string"
+```
 
 
-# -------------------------------- #
 # German Esset and Umlaut characters
-# -------------------------------- #
+
+```bash
 Crtl + Shift + u + 00df + <Enter>
 RightAlt + ss       -> ß     (in sequence; must set RightAlt to Alternative Characters Key in Settings)
 RightAlt + u + "    -> ü
 RightAlt + a + "    -> ä
+```
 
 
-# -------------------------------- #
-# pushd
-# -------------------------------- #
+## pushd
+
+```bash
 dirs                 list the directory stack
 dirs -p              list the directory stack, each on a new line
 dirs -c              clear the directory stack
@@ -192,33 +220,29 @@ pushd +N             Same above, but the Nth entry from the left (above is Nth e
 popd                 pop 1st dir off the stack and switch to 2nd
 popd +N              remove the Nth stack entry from the top
 popd -N              remove the Nth stack entry from the bottom
+```
 
 
-# -------------------------------- #
-# Kill a Process
-# -------------------------------- #
+## Kill a Process
+
+```bash
 top
 ps -ef | grep exec
 kill -USR1 <#>
+```
 
 
-# -------------------------------- #
-# Manage PDFs
-# -------------------------------- #
-pdftk *.pdf cat output combined.pdf                        combine multiple PDFs
-pdftk combined.pdf burst output mypage_%02d.pdf            separate multi-page PDF into single PDFs
+## Manage PDFs
+
+```bash
+pdftk *.pdf cat output combined.pdf               # combine multiple PDFs
+pdftk combined.pdf burst output mypage_%02d.pdf   # separate multi-page PDF into single PDFs
+```
 
 
-# -------------------------------- #
-# aterm settings
-# -------------------------------- #
-urxvt -scrollColor blue -tint blue -g 98x32 -title Blue
+## cron settings
 
-
-# -------------------------------- #
-# cron settings
-# -------------------------------- #
-
+```bash
    * * * * *      command to execute
    | | | | |
    | | | | |
@@ -227,25 +251,18 @@ urxvt -scrollColor blue -tint blue -g 98x32 -title Blue
    | | +--------   day of month (1 - 31)
    | +----------   hour of day (0 - 23)
    +------------   min of hour (0 - 59)
+```
 
+## get drive/mount disk space
 
-# -------------------------------- #
-# get drive/mount disk space
-# -------------------------------- #
+```bash
 df -Th
+```
 
 
-# -------------------------------- #
-# SomaLogic Colors
-# -------------------------------- #
-Purple:   R=90      G=85      B=110      [rgb(90,85,110,max=255)]
-Grey:     R=180     G=171     B=168
+## Compile R and install from source
 
-
-# -------------------------------- #
-# Local compile of application (R)
-# and installation compile from source
-# -------------------------------- #
+```bash
 mv ~/Downloads/R-3.1.0.tar.gz ~/Apps         # move tarball to dest dir
 tar -zvxf R-3.1.0.tar.gz                     # unzip
 cd R-3.1.0                                   # go into unzipped dir
@@ -255,22 +272,19 @@ make                                         # run make to finish local install
 make check                                   # checks that system-wide install will work
 #sudo make install                           # installs R to root in /usr/local/
 #sudo make uninstall                         # uninstall R
+```
 
 
+## run R examples check only
 
-# update R in Windows
-require(installr)
-updateR()
-
-# -------------------------------- #
-# run R examples check only
-# -------------------------------- #
-R -q --vanilla < SomaPkg-Ex.R                     # this is run on the Ex file generated by R CMD check
+```bash
+R -q --vanilla < SomaPkg-Ex.R     # this is run on the Ex file generated by R CMD check
+```
 
 
-# -------------------------------- #
-# VirtualBox
-# -------------------------------- #
+## VirtualBox
+
+```bash
 deb http://download.virtualbox.org/virtualbox/debian wily contrib      # virtualbox in sources.list
 https://www.virtualbox.org/wiki/Linux_Downloads
 sudo apt-get install virtualbox virtualbox-dkms
@@ -278,69 +292,72 @@ sudo apt-get install virtualbox-guest-additions-iso
 # Oracle_VM_VirtualBox_Extension_Pack-5.0.14-105127.vbox-extpack
 Install extension pack by: File -> Preferences -> Extensions
                            Remove old extensions and add new
+```
 
 
-# -------------------------------- #
-# batch rename
-# -------------------------------- #
-rename 's/pattern/replace/g' Soma*.log      # regular files
-for i in Soma*.tar.gz; do svn mv $i `echo $i | sed 's/4/5/'`; done      # files under SVN control
+## Batch Rename
+
+```bash
+rename 's/pattern/replace/g' [pattern].log      # regular log-text files
+for i in *.tar.gz
+  do svn mv $i `echo $i | sed 's/4/5/'`    # files under SVN control
+done      
+```
 
 
-# -------------------------------- #
-# upgrade git
-# -------------------------------- #
+## upgrade git
+
+```bash
 sudo add-apt-repository ppa:git-core/ppa -y
 sudo apt-get update
 sudo apt-get install git
 git --version
+```
 
 
-# -------------------------------- #
-# Git get code from deleted file
-# -------------------------------- #
+## Git get code from deleted file
+
+```bash
 git log --all -- <path-to-file>
 git show <SHA> -- <path-to-file>
+```
 
 
-# -------------------------------- #
-# Update Phone File
-# -------------------------------- #
-1) Get new *.docx file from Lauren
-2) Save As *.txt file:
-   i) MS-DOS encoding
-   ii) check insert line breaks
-   iii) use CR/LF
-3) call format.phone.file input.txt output.txt
 
-# -------------------------------- #
-# Java
-# -------------------------------- #
+## Update Java
+
+```bash
 sudo apt-get install oracle-java8-installer
 sudo apt-get install oracle-java8-set-default
-java -version
+java --version
+```
 
 
-# -------------------------------- #
-# Ubuntu release
-# -------------------------------- #
+## Ubuntu Release
+
+```bash
 lsb_release -a
+```
 
 
-# -------------------------------- #
-# apt-get
-# -------------------------------- #
+## apt-get
+
+```bash
 sudo apt-get install linux-headers-generic build-essential
 sudo vi /etc/apt/sources.list
 sudo apt-get update
 apt-cache showpkg r-base
 sudo apt-get install <pkgs>
+```
 
 
-# ----------------------------------- #
-# Increase VBox HD Storage
-# ----------------------------------- #
+## Increase VBox HD Storage
+
+```bash
 VBoxManage modifyhd --compact   # this should release memory from the VM is dynamically taken
 VBoxManage modifyhd --resize 80000 VMwin7.vdi   # 80GB
 File -> Virtual Media Manager -> Release then Remove
 Settings -> Storage -> Controller:SATA -> Add Icon -> "point to *.vdi" -> OK
+```
+
+
