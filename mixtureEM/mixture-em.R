@@ -75,8 +75,8 @@ normal_k2_mixture <- function(data, pars = list(start.mu = NULL,
   good_names <- c("start.mu", "start.sd", "start.pi")
 
   if ( any(!names(pars) %in% good_names) ) {
-    SomaGlobals::signal_oops("Pars arg is:", SomaGlobals::value(names(pars)))
-    SomaGlobals::signal_info("Should be:", SomaGlobals::value(good_names))
+    globalr::signal_oops("Pars arg is:", globalr::value(names(pars)))
+    globalr::signal_info("Should be:", globalr::value(good_names))
     stop("Check spelling of list names for `pars =` argument.", call. = FALSE)
   }
 
@@ -112,10 +112,10 @@ normal_k2_mixture <- function(data, pars = list(start.mu = NULL,
     loglik    <- tmp$loglik
     loglik_vec[iter] <- loglik
     if ( iter >= max.iter || min(sigma_par) < 1e-06 ) {
-      SomaGlobals::signal_oops(
+      globalr::signal_oops(
         "No convergence ... OR ... One of the variances is going to zero."
       )
-      SomaGlobals::signal_info("Restarting with new initial conditions.")
+      globalr::signal_info("Restarting with new initial conditions.")
       new_pars  <- choose_init(y = data, k = 2)
       mu_par    <- new_pars$start.mu
       sigma_par <- new_pars$start.sd
@@ -134,7 +134,7 @@ normal_k2_mixture <- function(data, pars = list(start.mu = NULL,
     }
   }
 
-  SomaGlobals::signal_done("Iteration ...", iter)
+  globalr::signal_done("Iteration ...", iter)
   structure(
     list(y      = data,
          mu     = mu_par,
@@ -157,20 +157,20 @@ normal_k2_mixture <- function(data, pars = list(start.mu = NULL,
 #'
 #' @rdname normal_k2_mixture
 #' @param x A `mix_k2` object generated from `normal_k2_mixture`.
-#' @importFrom SomaGlobals value signal_rule pad
+#' @importFrom globalr value signal_rule pad
 #' @export
 print.mix_k2 <- function(x, ...) {
   writeLines(
-    SomaGlobals::signal_rule(paste("Mix Type:", x$fn), line_col = "blue", lty = "double")
+    globalr::signal_rule(paste("Mix Type:", x$fn), line_col = "blue", lty = "double")
   )
   col1 <- c("n", "iter", "mu", "sigma", "pi_hat",
-            "lambda", "final loglik") |> SomaGlobals::pad(15)
+            "lambda", "final loglik") |> globalr::pad(15)
   col2 <- list(length(x$y), x$niter, x$mu, x$sigma, x$pi_hat,
                x$lambda, x$loglik) |> lapply(round, digits = 3L)
   for ( i in seq_along(col1) ) {
-    writeLines(paste(col1[i], SomaGlobals::value(col2[[i]])))
+    writeLines(paste(col1[i], globalr::value(col2[[i]])))
   }
-  writeLines(SomaGlobals::signal_rule(line_col = "green", lty = "double"))
+  writeLines(globalr::signal_rule(line_col = "green", lty = "double"))
   invisible(x)
 }
 
@@ -243,10 +243,10 @@ equal_likelihood_pt <- function(x) {
   stopifnot(inherits(x, "mix_k2"))
   a <- (1 / (2 * x$sigma[1L]^2)) - (1 / (2 * x$sigma[2L]^2))
   b <- (x$mu[2L] / x$sigma[2L]^2) - (x$mu[1L] / x$sigma[1L]^2)
-  c <- (x$mu[1L]^2 / (2 * x$sigma[1]^2)) - (x$mu[2L]^2 / (2 * x$sigma[2L]^2)) -
+  cc <- (x$mu[1L]^2 / (2 * x$sigma[1]^2)) - (x$mu[2L]^2 / (2 * x$sigma[2L]^2)) -
     (log(x$sigma[2L] / x$sigma[1L] * x$lambda[1L] / x$lambda[2L]))
   lik <- numeric(2)
-  lik[1L] <- (-b + sqrt(b^2 - 4 * a * c)) / (2 * a)
-  lik[2L] <- (-b - sqrt(b^2 - 4 * a * c)) / (2 * a)
-  lik[which(lik > min(x$mu) && lik < max(x$mu))]
+  lik[1L] <- (-b + sqrt(b^2 - 4 * a * cc)) / (2 * a)
+  lik[2L] <- (-b - sqrt(b^2 - 4 * a * cc)) / (2 * a)
+  lik[which(lik > min(x$mu) & lik < max(x$mu))]
 }
