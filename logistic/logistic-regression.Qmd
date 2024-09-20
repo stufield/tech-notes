@@ -1,60 +1,59 @@
 ---
 title: "Technical note: Logistic Regresstion"
 author: "Stu Field"
-date: "`r format(Sys.Date(), '%e %B %Y')`"
-output:
-  html_document:
-    code_folding: show
-    number_sections: yes
-    toc: yes
-    toc_float:
-      collapsed: no
-editor_options: 
-  markdown: 
-    wrap: 72
+date: today
+date-format: "D MMMM YYYY"
+format:
+  gfm:
+    preview-mode: raw
+# output:
+#   html_document:
+#     code_folding: show
+#     number_sections: yes
+#     toc: yes
+#     toc_float:
+#       collapsed: no
 ---
 
-```{r setup, include = FALSE}
+
+```{r}
+#| label: setup
+#| include: FALSE 
 knitr::opts_chunk$set(
- collapse = TRUE,
- comment = "#>"
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "figures/logistic-"
 )
 ```
-
-
----------
 
 
 ## Multivariate Logistic Regression
 
 As in univariate logistic regression, let $\pi(x)$ represent the
 probability of an event that depends on $p$ covariates or independent
-variables. Then, using an *inverse logit* formulation, which is simply
+variables. Then, using an _inverse logit_ formulation, which is simply
 the inverse of log-odds, for modeling the probability, we have:
 
 $$
 \def \ebx{e^{\beta_0+\beta_1X_1+\beta_2X_2+\dots+\beta_pX_p}}
+
 \begin{equation}
-	\pi(X) = \frac{\ebx}{1+\ebx}
+  \pi(X) = \frac{\ebx}{1+\ebx}
 \end{equation}
 $$
 
 The form is identical to univariate logistic regression, but now
 with more than one covariate.
 
-To obtain the corresponding log-odds (*logit*) function we get:
+To obtain the corresponding log-odds (_logit_) function we get:
 
 $$
 \begin{eqnarray}
-	logit(\pi(X))	&=& log\bigg(\frac{\pi(X)}{1-\pi(X)}\bigg) \\
-						&& \nonumber \\
-						&=& log\Bigg[\frac{\frac{\ebx}{1+\ebx}}{1-\frac{\ebx}{1+\ebx}}\Bigg] \\
-						&& \nonumber \\
-						&=& log\Bigg[\frac{\frac{\ebx}{1+\ebx}}{\frac{1}{1+\ebx}}\Bigg] \\
-						&& \nonumber \\
-						&=& log\big(\ebx\big) \\
-						&& \nonumber \\
-						&=& \beta_0+\beta_1X_1+\beta_2X_2+\dots+\beta_pX_p,
+  logit(\pi(X)) &=& log\bigg(\frac{\pi(X)}{1-\pi(X)}\bigg) \\
+                &=& log\Bigg[\frac{\frac{\ebx}{1+\ebx}}{1-\frac{\ebx}{1+\ebx}}\Bigg] \\
+                &=& log\Bigg[\frac{\frac{\ebx}{1+\ebx}}{\frac{1}{1+\ebx}}\Bigg] \\
+                &=& log\big(\ebx\big) \\
+                &=& \beta_0+\beta_1X_1+\beta_2X_2+\dots+\beta_pX_p,
 \end{eqnarray}
 $$
 
@@ -65,17 +64,23 @@ regression. Notice also that it is trivial to convert from log-odds
 to probability via:
 
 $$
-\begin{equation}
-	odds = \frac{\pi}{1-\pi},\, \, \, \pi = \frac{odds}{1+odds}
-\end{equation}
+\begin{eqnarray}
+  odds &=& \frac{\pi}{1-\pi} \\
+  && \\
+  \pi  &=& \frac{odds}{1+odds}
+\end{eqnarray}
 $$
+
 
 Plots of the logit ('link') function and its inverse, the logistic function.
 The logistic function maps any value on the y-axis of the logit function
 to a value on $(0, 1)$.
 
-```{r logit, fig.width=10, fig.height=5}
-par(mfrow=c(1, 2))
+```{r}
+#| label: logit
+#| fig.width: 10
+#| fig.height: 5
+par(mfrow=c(1, 2L))
 curve(log(x / (1 - x)), from = 0, to = 1, col = "navy", lwd = 2,
       main = "The Logit Function",
       ylab = bquote("log-odds = logit(x) = x / (1 - x)"))
@@ -86,10 +91,10 @@ curve(exp(x) / (1 + exp(x)), from = -6, to = 6, col = "navy", lwd = 2,
 abline(v = 0, lty = 2)
 ```
 
-
 Similar to linear regression, and analogously to univariate logistic
 regression, the above equations represent the mean or expected probability,
 $\pi(X)$, given $X$.
+
 As this is an estimate, each data point will have an error distribution,
 but rather than a normal distribution (linear regression), we use a
 binomial distribution, to match the dichotomous outcomes. The mean of
@@ -104,7 +109,3 @@ of maximum likelihood. **Technical point**: there is no error term for
 the overall logistic regression model, unlike in linear regressions.
 
 
-------
-
-Created by [Rmarkdown](https://github.com/rstudio/rmarkdown)
-(v`r utils::packageVersion("rmarkdown")`) and `r R.version$version.string`.
