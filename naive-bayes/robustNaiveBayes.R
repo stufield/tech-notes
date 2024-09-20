@@ -1,18 +1,20 @@
 #' Robustly Fit Naive Bayes Classifier
 #'
-#' Computes the conditional a-posterior probabilities of a categorical class
-#' variable given independent predictor variables using the Bayes rule.
-#' Parameter estimates are robustly calculated using approximations of the error
-#' function for a Gaussian density, see [calcRobustGaussFit()].
+#' Computes the conditional _a_-posterior probabilities of a
+#' categorical class variable given independent predictor
+#' variables using the Bayes rule.
+#' Parameter estimates are robustly calculated using approximations
+#' of the error function for a Gaussian density, see [calcRobustGaussFit()].
 #'
-#' When `mad = TRUE` (median absolute deviation), non-parametric calculation of
-#' Bayes' parameters are estimated, namely, `mu = median(x)` and `sd = IQR(x) /
-#' 1.349`. That is, `calcRobustGaussFit(..., mad = TRUE)`.
+#' When `mad = TRUE` (median absolute deviation), non-parametric
+#' calculation of Bayes' parameters are estimated,
+#' namely, `mu = median(x)` and `sd = IQR(x) / 1.349`.
+#' That is, `calcRobustGaussFit(..., mad = TRUE)`.
 #'
 #' @param x A numeric matrix, or a data frame of categorical and/or numeric
 #'   variables. If called from an S3 generic method (e.g.
 #'   [plot.robustNaiveBayes()]) or [print.robustNaiveBayes()]), either a
-#'   `robustNaiveBayes` or `naiveBayes` object.
+#'   `robustNaiveBayes` or `naiveBayes` class object.
 #' @param y A vector indicating the true classes for each sample. Ideally a
 #'   factor class object with appropriate levels.
 #' @param mad Logical. Should non-parametric approximations be applied during
@@ -30,9 +32,8 @@
 #'   coefficients.
 #' @author Stu Field
 #' @seealso [calcRobustGaussFit()]
-#' @references This function was *heavily* influenced by the
-#'   [e1071::naiveBayes()] function. See David Meyer <email:
-#'   David.Meyer@R-project.org>.
+#' @references This function was _heavily_ influenced by [e1071::naiveBayes()]
+#'   See David Meyer <email: David.Meyer@R-project.org>.
 #' @examples
 #' head(iris)
 #' # standard naiveBayes
@@ -84,8 +85,8 @@ robustNaiveBayes.default <- function(x, y, mad = FALSE, laplace = 0,
       cbind(mu    = tapply(var, y, mean, na.rm = TRUE),
             sigma = tapply(var, y, sd, na.rm = TRUE))
     } else {
-      # this part doesn't make sense to me, laplace correction?
-      # See ?naiveBayes documentation: sgf
+      # this part doesn't make sense to me; sgf
+      # See ?e1071::naiveBayes documentation
       tab <- table(y, var)
       (tab + laplace) / (rowSums(tab) + laplace * nlevels(var))
     }
@@ -106,18 +107,18 @@ robustNaiveBayes.default <- function(x, y, mad = FALSE, laplace = 0,
   ret$apriori <- apriori
   ret$tables  <- tables
   ret$levels  <- levels(y)
-  ret$data    <- if ( keep.data ) cbind(x, Response = y) else FALSE
+  ret$data    <- if ( keep.data ) cbind(x, Response = y) else FALSE # nolint
   ret$call    <- match.call(expand.dots = TRUE)
   structure(ret, class = c("robustNaiveBayes", "list"))
 }
 
 
 #' @describeIn robustNaiveBayes
-#'   S3 formula method for robustNaiveBayes.
+#' S3 formula method for robustNaiveBayes.
 #' @param formula A model formula of the form: `class ~ x1 + x2 + ...`
-#'   (no interactions).
+#' (no interactions).
 #' @param data A data frame of predictors (categorical and/or numeric), i.e.
-#'   the ADAT used to train the model.
+#' the ADAT used to train the model.
 #' @export
 robustNaiveBayes.formula <- function(formula, data, ...) {
 
@@ -147,7 +148,7 @@ robustNaiveBayes.formula <- function(formula, data, ...) {
 
 
 #' @describeIn robustNaiveBayes
-#'   S3 print method for robustNaiveBayes.
+#' S3 print method for robustNaiveBayes.
 #' @export
 print.robustNaiveBayes <- function(x, ...) {
   cat("\nRobust Naive Bayes Classifier for Discrete Predictors\n\n")
@@ -167,7 +168,7 @@ print.robustNaiveBayes <- function(x, ...) {
 
 
 #' @describeIn robustNaiveBayes
-#'   S3 predict method for robustNaiveBayes.
+#' S3 predict method for robustNaiveBayes.
 #' @param object A model object of class `robustNaiveBayes`.
 #' @param newdata A `data.frame` with new predictors, containing at least
 #'   the model covariates (but possibly more columns than the training data).
@@ -175,7 +176,7 @@ print.robustNaiveBayes <- function(x, ...) {
 #'   training data ones.
 #' @param type If `"class"` (default), the class name with maximal
 #'   posterior probability is returned for each sample, otherwise the
-#'   conditional *a-posterior* probabilities for each class are returned.
+#'   conditional _a-posterior_ probabilities for each class are returned.
 #'   Additionally, if called from within the S3 plot method, a character
 #'   string determining the plot type, currently either CDF or PDF (default).
 #'   Argument can be shortened and is matched.
@@ -198,36 +199,33 @@ predict.robustNaiveBayes <- function(object, newdata,
 
   type    <- match.arg(type)
   # map to either posterior or raw
-  type    <- switch(type,
-                    class     = "class",
-                    raw       = "posterior",
-                    posterior = "posterior")
+  type      <- switch(type, class = "class", raw = , posterior = "posterior")
   newdata   <- as.data.frame(newdata)
   new_names <- names(newdata)
   features  <- match(names(object$tables), new_names)  # matched index col #
   features  <- new_names[features]
 
-  if ( length(features) == 0 ) {
+  if ( length(features) == 0L ) {
     stop("No common features between `model` and `newdata`.", call. = FALSE)
   }
 
-  isnumeric <- vapply(newdata, is.numeric, FUN.VALUE = logical(1))
+  isnumeric <- vapply(newdata, is.numeric, FUN.VALUE = NA)
   # suppress NAs generated warning for meta data if present
   newdata <- suppressWarnings(data.matrix(newdata[, features]))
-  prior   <- c(object$apriori) |> prop.table() |> log()
+  prior   <- prop.table(c(object$apriori)) |> log()
   L <- lapply(seq_len(nrow(newdata)), function(.i) {
        ndata <- newdata[.i, ]
        likelihood <- lapply(features, function(.v) {
            nd <- ndata[[.v]]    # scalar; new data point
            if ( is.na(nd) ) {
-             rep(1, length(prior))
              signal_oops(
-               "Bad `newdata` sample (row) ... check for NAs,",
-               "non-numerics, meta data, etc."
+               "Bad `newdata` in row", value(.i), "...",
+               "check for NAs, non-numerics, meta data, etc."
              )
+             rep.int(1L, length(prior))
            } else {
              if ( isnumeric[.v] ) {
-               mu_sd <- object$tables[[.v]]            # parameter table
+               mu_sd <- object$tables[[.v]]                  # parameter table
                mu_sd[, 2L][ mu_sd[, 2L] == 0 ] <- threshold  # limit sd=0
                prob <- stats::dnorm(nd, mean = mu_sd[, 1L], sd = mu_sd[, 2L])
              } else {
@@ -238,10 +236,9 @@ predict.robustNaiveBayes <- function(object, newdata,
                prob[ prob < min.prob ]     <- min.prob
                prob[ prob > 1 - min.prob ] <- 1 - min.prob
              }
-             return(prob)
+             prob
            }
-      }) |> data.frame() |>
-      setNames(features)
+      }) |> data.frame() |> setNames(features)
 
       checkNaiveBayesBias(likelihood)         # check excessive feature bias
       likelihood <- rowSums(log(likelihood))
@@ -270,11 +267,10 @@ predict.robustNaiveBayes <- function(object, newdata,
 #' @param x.lab Character. Optional label for the x-axis.
 #' @param sampleId An optional identifier of a specific sample to plot on top of
 #'   either PDFs or CDFs. This may be either a numeric index of the sample row
-#'   in the `data`, or its row name identifier. Can be of length > 1.
+#'   in the `data`, or its row name identifier. Can be of `length > 1`.
 #' @return `plot.robustNaiveBayes`, `plot.naiveBayes`: A plot, either a list of
 #'   PDFs/CDFs, or a log-odds plot.
-#' @seealso [SomaPlot::plotPDFlist()], [SomaPlot::plotCDFlist()]
-#' @seealso [plotLogOdds()]
+#' @seealso [plotLogOdds()], [SomaPlot::plotPDFlist()], [SomaPlot::plotCDFlist()]
 #' @examples
 #' # Plotting
 #' iris <- convert2TrainingData(iris, "Species")   # convert to "tr_data"
@@ -283,6 +279,7 @@ predict.robustNaiveBayes <- function(object, newdata,
 #' plot(m1, iris, plot.type = "cdf")  # plot type CDF
 #' plot(m2, iris, features = "Sepal.Length", sampleId = 70)  # 1 feature
 #' plot(m1, iris, plot.type = "cdf", lty = "longdash")   # pass through of linetype
+#' @importFrom dplyr all_of
 #' @export
 plot.robustNaiveBayes <- function(x, data, features,
                                   plot.type = c("pdf", "cdf", "log.odds"),
@@ -300,7 +297,7 @@ plot.robustNaiveBayes <- function(x, data, features,
     stopifnot(inherits(data, "tr_data"))
   }
 
-  if ( is.soma_adat(data) && is.intact.attributes(data)) {
+  if ( is.soma_adat(data) && is_intact_attr(data) ) {
     tg <- getTargetNames(getAnalyteInfo(data))
   } else {
     tg <- NULL
@@ -316,7 +313,7 @@ plot.robustNaiveBayes <- function(x, data, features,
     features <- getModelFeatures(x)
   }
 
-  data <- dplyr::select(data, features, Response)
+  data <- dplyr::select(data, all_of(features), Response)
 
   if ( plot.type == "pdf" ) {
     p <- lapply(features, function(apt) {
@@ -347,7 +344,7 @@ plot.robustNaiveBayes <- function(x, data, features,
 
   } else if ( plot.type == "log.odds" ) {
 
-    if ( length(x$levels) != 2 ) {
+    if ( length(x$levels) != 2L ) {
       stop(
         "Log-odds plots not supported for non-binary class predictions: ",
         value(x$levels), ".", call. = FALSE
@@ -373,12 +370,12 @@ plot.naiveBayes <- plot.robustNaiveBayes
 #' during the prediction of a naive Bayes model for a single sample.
 #'
 #' @param likelihoods A `matrix` or `tibble` class object with the
-#'   rows as the possible classes (>= 2) and the columns as the features.
-#'   Likelihoods should not yet be log-transformed and entries should be as they
-#'   come from [dnorm()].
+#' rows as the possible classes (>= 2) and the columns as the features.
+#' Likelihoods should not yet be log-transformed and entries should be as they
+#' come from [dnorm()].
 #' @param max.lr The threshold maximum allowed log-likelihood ratio.
 #' @return `checkNaiveBayesBias`: If excessive influence on likelihoods are
-#'   detected a warning is triggered and the responsible feature(s) are flagged.
+#' detected a warning is triggered and the responsible feature(s) are flagged.
 #' @author Stu Field
 #' @examples
 #' lik <- matrix(runif(6), ncol = 3)
@@ -389,11 +386,11 @@ plot.naiveBayes <- plot.robustNaiveBayes
 #' checkNaiveBayesBias(lik, max.lr = 1)   # set a low threshold
 #' @noRd
 checkNaiveBayesBias <- function(likelihoods, max.lr = 1e04) {
-  lr <- apply(log(likelihoods), 1, function(.x) .x / .x[1L]) |>
+  lr <- apply(log(likelihoods), 1L, function(.x) .x / .x[1L]) |>
     abs() |> t()
   for ( i in seq_len(nrow(lr)) ) {
     which_high <- which(lr[i, ] > max.lr)
-    if ( length(which_high) > 0 ) {
+    if ( length(which_high) > 0L ) {
       flag_feats <- colnames(likelihoods)[which_high]
       warning(
         "These features are heavily influencing the naive ",
