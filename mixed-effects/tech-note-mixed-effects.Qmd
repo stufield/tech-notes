@@ -372,6 +372,7 @@ GroupResponseData |>
 ## Analysis in `R`
 
 The model specification to fit:
+
 $$
 \begin{equation}
    y_{ij} = b_{0i} + \beta_1 time_{ij} + \beta_2 group_i + 
