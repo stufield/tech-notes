@@ -1,5 +1,10 @@
 # Linux Cheat Sheet of (Ubuntu) Commands
-========================
+
+Stu Field
+
+20 September 2024
+
+-------------------------
 
 
 ## Symbolic Links
