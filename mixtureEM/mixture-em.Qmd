@@ -18,7 +18,7 @@ format:
 ```{r}
 #| label: setup
 #| include: FALSE 
-library(globalr)
+library(helpr)
 
 source("mixture-em.R")
 
